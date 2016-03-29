@@ -1,0 +1,15 @@
+{
+  "name": "go1/app",
+  "license": "MIT",
+  "prefer-stable": true,
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "go1\\app\\": "./"
+    }
+  },
+  "require": {
+    "silex/silex": "~2.0@dev",
+    "go1/jwt-middleware": "^0.1"
+  }
+}
