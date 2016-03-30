@@ -9,7 +9,8 @@
     }
   },
   "require": {
-    "silex/silex": "~2.0@dev",
-    "go1/jwt-middleware": "^0.1"
+    "doctrine/dbal": "^2.5",
+    "go1/jwt-middleware": "^0.1",
+    "silex/silex": "~2.0@dev"
   }
 }
