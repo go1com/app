@@ -4,6 +4,8 @@ namespace go1\app;
 
 use go1\jwt_middleware\JwtMiddleware;
 use Silex\Application;
+use Silex\Provider\DoctrineServiceProvider;
+use Silex\Provider\ServiceControllerServiceProvider;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -13,6 +15,17 @@ class App extends Application
     {
         parent::__construct($values);
 
+        // Clean routing
+        // @see http://silex.sensiolabs.org/doc/providers/service_controller.html
+        $this->register(new ServiceControllerServiceProvider());
+
+        // Auto register doctrine DBAL service provider if the app needs it.
+        // @see http://silex.sensiolabs.org/doc/providers/doctrine.html
+        if (!empty($values['db.options'])) {
+            $this->register(new DoctrineServiceProvider(), ['db.options' => $values['db.options']]);
+        }
+
+        // Use go1.jwt-middleware
         $this->providers[] = new JwtMiddleware();
 
         // Convert json request to array
