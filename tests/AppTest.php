@@ -3,6 +3,8 @@
 namespace go1\app;
 
 use DomainException;
+use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -91,5 +93,24 @@ class AppTest extends \PHPUnit_Framework_TestCase
 
         $app->handle($request);
         $this->assertTrue($called, 'Callback is executed.');
+    }
+
+    public function testEventListener()
+    {
+        $triggered = false;
+
+        $app = new App([
+            'events' => [
+                'foo' => function (Event $event) use (&$triggered) {
+                    $triggered = ($event instanceof Event);
+                },
+            ],
+        ]);
+
+        /** @var EventDispatcherInterface $dispatcher */
+        $dispatcher = $app['dispatcher'];
+        $dispatcher->dispatch('foo');
+
+        $this->assertTrue($triggered, 'Our listener is triggered.');
     }
 }

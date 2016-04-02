@@ -13,6 +13,10 @@ class App extends Application
 {
     public function __construct(array $values = [])
     {
+        if (isset($values['events'])) {
+            $events = $values['events'];
+        }
+
         parent::__construct($values);
 
         // Clean routing
@@ -35,6 +39,12 @@ class App extends Application
                 $request->request->replace(is_array($data) ? $data : []);
             }
         });
+
+        if (!empty($events)) {
+            foreach ($events as $event => $callback) {
+                $this->on($event, $callback);
+            }
+        }
 
         $this->get('/', function () {
             return $this->json(['time' => isset($this['time']) ? $this['time'] : time()]);
