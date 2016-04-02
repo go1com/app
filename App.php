@@ -15,6 +15,7 @@ class App extends Application
     {
         if (isset($values['events'])) {
             $events = $values['events'];
+            unset($values['events']);
         }
 
         parent::__construct($values);
