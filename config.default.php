@@ -1,5 +1,7 @@
 <?php
 
+use go1\app\App;
+
 return call_user_func(function () {
     date_default_timezone_set('UTC');
 
@@ -9,6 +11,11 @@ return call_user_func(function () {
     }
 
     return [
-        'debug' => $debug,
+        'debug'  => $debug,
+        'routes' => [
+            ['GET', '/', function (App $c) {
+                return $c->json(['time' => isset($c['time']) ? $c['time'] : time()]);
+            }],
+        ],
     ];
 });

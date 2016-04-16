@@ -13,6 +13,11 @@ class App extends Application
 {
     public function __construct(array $values = [])
     {
+        if (isset($values['routes'])) {
+            $routes = $values['routes'];
+            unset($values['routes']);
+        }
+
         if (isset($values['events'])) {
             $events = $values['events'];
             unset($values['events']);
@@ -47,9 +52,12 @@ class App extends Application
             }
         }
 
-        $this->get('/', function () {
-            return $this->json(['time' => isset($this['time']) ? $this['time'] : time()]);
-        });
+        if (!empty($routes)) {
+            foreach ($routes as &$route) {
+                list($method, $path, $callback) = $route;
+                $this->match($path, $callback)->method($method);
+            }
+        }
     }
 
     public function boot()
