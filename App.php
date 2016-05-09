@@ -2,12 +2,14 @@
 
 namespace go1\app;
 
+use Doctrine\DBAL\Connection;
 use go1\jwt_middleware\JwtMiddleware;
 use Silex\Application;
 use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class App extends Application
 {
@@ -66,5 +68,23 @@ class App extends Application
         });
 
         parent::boot();
+    }
+
+    public function terminate(Request $request, Response $response)
+    {
+        parent::terminate($request, $response);
+
+        $this->closeDatabaseConnection();
+    }
+
+    private function closeDatabaseConnection($target = 'default')
+    {
+        if (class_exists(Connection::class, false)) {
+            /** @var Connection $db */
+            $db = $this['dbs'][$target];
+            if ($db->isConnected()) {
+                $db->close();
+            }
+        }
     }
 }
