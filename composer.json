@@ -14,6 +14,7 @@
     "silex/silex": "^2.0.0"
   },
   "require-dev": {
+    "guzzlehttp/guzzle": "^6.0",
     "monolog/monolog": "^1.19.0"
   }
 }

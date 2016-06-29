@@ -36,3 +36,13 @@ $app = new go1\App(['logOptions' => $options]);
 // Access `logger` service, instance of `Psr\Log\LoggerInterface`
 $logger = $app['logger'];
 ```
+
+## HTTP client service
+
+```
+$options = ['allow_redirects' => false];
+$app = new go1\App(['clientOptions' => $options]);
+
+// Access `client` service, instance of `GuzzleHttp\Client`
+$client = $app['client'];
+```

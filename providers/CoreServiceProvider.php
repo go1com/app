@@ -6,6 +6,7 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\FilesystemCache;
 use Doctrine\Common\Cache\MemcacheCache;
 use go1\jwt_middleware\JwtMiddleware;
+use GuzzleHttp\Client;
 use Memcache;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\SyslogHandler;
@@ -30,6 +31,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         // Custom services
         $c->offsetExists('cacheOptions') && $this->registerCacheServices($c);
         $c->offsetExists('logOptions') && $this->registerLogServices($c);
+        $c->offsetExists('clientOptions') && $this->registerClientService($c);
 
         $c['middleware.jwt'] = function () {
             return new JwtMiddleware();
@@ -102,6 +104,13 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $c['logger.php_error'] = function () {
             return new ErrorLogHandler();
+        };
+    }
+
+    private function registerClientService(Container $c)
+    {
+        $c['client'] = function (Container $c) {
+            return new Client($c['clientOptions']);
         };
     }
 }
