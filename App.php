@@ -11,6 +11,17 @@ class App extends Application
 
     public function __construct(array $values = [])
     {
+        if (isset($values['dbOptions'])) {
+            if (isset($values['dbOptions']['driver'])) {
+                $this['db.options'] = $values['dbOptions'];
+            }
+            else {
+                $this['dbs.options'] = $values['dbOptions'];
+            }
+
+            unset($values['dbOptions']);
+        }
+
         if (isset($values['routes'])) {
             $routes = $values['routes'];
             unset($values['routes']);

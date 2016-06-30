@@ -26,7 +26,8 @@ class CoreServiceProvider implements ServiceProviderInterface
         $c->register(new ServiceControllerServiceProvider());
 
         // Auto register doctrine DBAL service provider if the app needs it. Documentation: http://silex.sensiolabs.org/doc/providers/doctrine.html
-        $c->offsetExists('dbOptions') && $c->register(new DoctrineServiceProvider(), ['db.options' => $c['dbOptions']]);
+        $c->offsetExists('db.options') && $c->register(new DoctrineServiceProvider(), ['db.options' => $c['db.options']]);
+        $c->offsetExists('dbs.options') && $c->register(new DoctrineServiceProvider(), ['dbs.options' => $c['dbs.options']]);
 
         // Custom services
         $c->offsetExists('cacheOptions') && $this->registerCacheServices($c);
