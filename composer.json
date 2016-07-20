@@ -10,7 +10,7 @@
   },
   "require": {
     "doctrine/dbal": "^2.5",
-    "go1/jwt-middleware": "^0.1",
+    "go1/jwt-middleware": "^0.2",
     "silex/silex": "^2.0.0"
   },
   "require-dev": {
