@@ -2,8 +2,11 @@
 
 namespace go1\app;
 
+use Doctrine\DBAL\DBALException;
+use Exception;
 use go1\app\providers\CoreServiceProvider;
 use Silex\Application;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class App extends Application
 {
@@ -50,5 +53,11 @@ class App extends Application
                 $this->match($path, $callback)->method($method);
             }
         }
+
+        $this->error(function (Exception $e) {
+            if ($e instanceof DBALException) {
+                return new JsonResponse(['message' => 'Database error #' . $e->getCode()], 500);
+            }
+        });
     }
 }
