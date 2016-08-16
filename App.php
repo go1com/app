@@ -7,6 +7,7 @@ use Exception;
 use go1\app\providers\CoreServiceProvider;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
 class App extends Application
 {
@@ -57,6 +58,10 @@ class App extends Application
         $this->error(function (Exception $e) {
             if ($e instanceof DBALException) {
                 return new JsonResponse(['message' => 'Database error #' . $e->getCode()], 500);
+            }
+
+            if ($e instanceof MethodNotAllowedException) {
+                return new JsonResponse(['message' => $e->getMessage()], 404);
             }
         });
     }
