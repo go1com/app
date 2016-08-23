@@ -9,17 +9,13 @@ The `cache` service will become `Doctrine\Common\Cache\ArrayCache` on testing.
 
 ```
 # Memcache backend
-$options = [
-    'backend' => 'memcache',
-    'host' => '127.0.0.1',
-    'port' => '11211'
-];
+$options = ['backend' => 'memcache', 'host' => '127.0.0.1', 'port' => '11211'];
+
+# Memcached
+$options = ['backend' => 'memcached', 'host' => '127.0.0.1', 'port' => '11211'];
 
 # File system backend
-$options = [
-    'backend'   => 'filesystem',
-    'directory' => '/path/to/cache/',
-];
+$options = ['backend'   => 'filesystem', 'directory' => '/path/to/cache/'];
 
 $app = new go1\App(['cacheOptions' => $options]);
 

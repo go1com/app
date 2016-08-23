@@ -5,9 +5,11 @@ namespace go1\app\providers;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\FilesystemCache;
 use Doctrine\Common\Cache\MemcacheCache;
+use Doctrine\Common\Cache\MemcachedCache;
 use go1\jwt_middleware\JwtMiddleware;
 use GuzzleHttp\Client;
 use Memcache;
+use Memcached;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Logger;
@@ -80,6 +82,23 @@ class CoreServiceProvider implements ServiceProviderInterface
 
             $cache = new MemcacheCache();
             $cache->setMemcache($memcache);
+
+            return $cache;
+        };
+
+        $c['cache.memcached'] = function (Container $c) {
+            if (!class_exists('Memcached')) {
+                throw new RuntimeException('Missing caching driver.');
+            }
+
+            $name = isset($c['cacheOptions']['name']) ? $c['cacheOptions']['name'] : null;
+            $host = $c['cacheOptions']['host'];
+            $port = $c['cacheOptions']['port'];
+            $memcached = new Memcached($name);
+            $memcached->addServer($host, $port);
+
+            $cache = new MemcachedCache();
+            $cache->setMemcached($memcached);
 
             return $cache;
         };
