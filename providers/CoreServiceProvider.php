@@ -52,6 +52,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             switch ($backend) {
                 case 'array':
                 case 'memcache':
+                case 'memcached':
                 case 'filesystem':
                     return class_exists(PHPUnit_Framework_TestCase::class, false) ? $c["cache.array"] : $c["cache.{$backend}"];
 
