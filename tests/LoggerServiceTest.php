@@ -35,7 +35,6 @@ class LoggerServiceTest extends PHPUnit_Framework_TestCase
     {
         return [
             [['level' => LogLevel::INFO], Logger::INFO],
-            [['level' => 'foo'], Logger::ERROR],
             [[], Logger::ERROR],
         ];
     }
