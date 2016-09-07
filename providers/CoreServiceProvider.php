@@ -18,7 +18,6 @@ use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Log\LogLevel;
 use RuntimeException;
-use ReflectionClass;
 use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
 
