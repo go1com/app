@@ -114,14 +114,9 @@ class CoreServiceProvider implements ServiceProviderInterface
             $testing = class_exists(PHPUnit_Framework_TestCase::class, false);
 
             $logger = new Logger($name);
-            $logger->pushHandler($c['logger.syslog']);
             $debug && !$testing && $logger->pushHandler($c['logger.php_error']);
 
             return $logger;
-        };
-
-        $c['logger.syslog'] = function (Container $c) {
-            return new SyslogHandler($c['logOptions']['name']);
         };
 
         $c['logger.php_error'] = function (Container $c) {
