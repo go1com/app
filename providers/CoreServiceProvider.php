@@ -11,7 +11,6 @@ use GuzzleHttp\Client;
 use Memcache;
 use Memcached;
 use Monolog\Handler\ErrorLogHandler;
-use Monolog\Handler\SyslogHandler;
 use Monolog\Logger;
 use PHPUnit_Framework_TestCase;
 use Pimple\Container;
