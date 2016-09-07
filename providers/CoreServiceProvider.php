@@ -16,6 +16,7 @@ use Monolog\Logger;
 use PHPUnit_Framework_TestCase;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\Log\LogLevel;
 use RuntimeException;
 use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
@@ -123,8 +124,10 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new SyslogHandler($c['logOptions']['name']);
         };
 
-        $c['logger.php_error'] = function () {
-            return new ErrorLogHandler();
+        $c['logger.php_error'] = function (Container $c) {
+            $logLevel = isset($c['logOptions']['level']) ? $c['logOptions']['level'] : LogLevel::ERROR;
+
+            return new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel);
         };
     }
 
