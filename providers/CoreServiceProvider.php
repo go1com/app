@@ -25,11 +25,11 @@ class CoreServiceProvider implements ServiceProviderInterface
     public function register(Container $c)
     {
         // Clean routing. Documentation: http://silex.sensiolabs.org/doc/providers/service_controller.html
-        $c->register(new ServiceControllerServiceProvider());
+        $c->register(new ServiceControllerServiceProvider);
 
         // Auto register doctrine DBAL service provider if the app needs it. Documentation: http://silex.sensiolabs.org/doc/providers/doctrine.html
-        $c->offsetExists('db.options') && $c->register(new DoctrineServiceProvider(), ['db.options' => $c['db.options']]);
-        $c->offsetExists('dbs.options') && $c->register(new DoctrineServiceProvider(), ['dbs.options' => $c['dbs.options']]);
+        $c->offsetExists('db.options') && $c->register(new DoctrineServiceProvider, ['db.options' => $c['db.options']]);
+        $c->offsetExists('dbs.options') && $c->register(new DoctrineServiceProvider, ['dbs.options' => $c['dbs.options']]);
 
         // Custom services
         $c->offsetExists('cacheOptions') && $this->registerCacheServices($c);
@@ -37,11 +37,11 @@ class CoreServiceProvider implements ServiceProviderInterface
         $c->offsetExists('clientOptions') && $this->registerClientService($c);
 
         $c['middleware.jwt'] = function () {
-            return new JwtMiddleware();
+            return new JwtMiddleware;
         };
 
         $c['middleware.core'] = function () {
-            return new CoreMiddlewareProvider();
+            return new CoreMiddlewareProvider;
         };
     }
 
@@ -81,7 +81,7 @@ class CoreServiceProvider implements ServiceProviderInterface
                 throw new RuntimeException('Can not connect to cache backend.');
             }
 
-            $cache = new MemcacheCache();
+            $cache = new MemcacheCache;
             $cache->setMemcache($memcache);
 
             return $cache;
@@ -108,14 +108,9 @@ class CoreServiceProvider implements ServiceProviderInterface
     private function registerLogServices(Container $c)
     {
         $c['logger'] = function (Container $c) {
-            $name = $c['logOptions']['name'];
-            $debug = !empty($c['debug']);
-            $testing = class_exists(PHPUnit_Framework_TestCase::class, false);
+            $logger = new Logger(isset($c['logOptions']['name']) ? $c['logOptions']['name'] : 'go1');
 
-            $logger = new Logger($name);
-            $debug && !$testing && $logger->pushHandler($c['logger.php_error']);
-
-            return $logger;
+            return $logger->pushHandler($c['logger.php_error']);
         };
 
         $c['logger.php_error'] = function (Container $c) {
