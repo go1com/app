@@ -2,12 +2,14 @@
 
 namespace go1\app\tests;
 
+use Doctrine\DBAL\DBALException;
 use go1\app\App;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use PHPUnit_Framework_TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Symfony\Component\HttpFoundation\Request;
 
 class LoggerServiceTest extends PHPUnit_Framework_TestCase
 {
@@ -43,5 +45,30 @@ class LoggerServiceTest extends PHPUnit_Framework_TestCase
     {
         $app = new App();
         $this->assertNull($app['logger']);
+    }
+
+    public function testDBALExceptionLog() {
+        $app = new App([
+            'routes' => [
+                ['GET', '/', function() {
+                    throw new DBALException('foo message');
+                }]
+            ]
+        ]);
+        $app['logger'] = function () {
+            $logger = $this
+                ->getMockBuilder(Logger::class)
+                ->disableOriginalConstructor()
+                ->setMethods(['error', 'pushHandler', 'addRecord'])
+                ->getMock();
+            $logger
+                ->expects($this->once())
+                ->method('error')
+                ->with('foo message');
+
+            return $logger;
+        };
+
+        $app->handle(Request::create('/'));
     }
 }

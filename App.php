@@ -57,6 +57,7 @@ class App extends Application
 
         $this->error(function (Exception $e) {
             if ($e instanceof DBALException) {
+                $this['logger'] && $this['logger']->error($e->getMessage());
                 return new JsonResponse(['message' => 'Database error #' . $e->getCode()], 500);
             }
 
