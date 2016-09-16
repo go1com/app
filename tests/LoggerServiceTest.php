@@ -59,7 +59,6 @@ class LoggerServiceTest extends PHPUnit_Framework_TestCase
             $logger = $this
                 ->getMockBuilder(Logger::class)
                 ->disableOriginalConstructor()
-                ->setMethods(['error'])
                 ->setMethodsExcept()
                 ->getMock();
             $logger
