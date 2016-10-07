@@ -13,8 +13,12 @@ class App extends Application
 {
     const NAME = 'go1';
 
+    private $timerStart;
+
     public function __construct(array $values = [])
     {
+        $this->timerStart = microtime();
+
         if (isset($values['dbOptions'])) {
             if (isset($values['dbOptions']['driver'])) {
                 $this['db.options'] = $values['dbOptions'];
@@ -56,8 +60,13 @@ class App extends Application
         }
 
         $this->error(function (Exception $e) {
+            if ($this['debug']) {
+                throw $e;
+            }
+
             if ($e instanceof DBALException) {
                 $this['logger'] && $this['logger']->error($e->getMessage());
+
                 return new JsonResponse(['message' => 'Database error #' . $e->getCode()], 500);
             }
 
@@ -65,5 +74,10 @@ class App extends Application
                 return new JsonResponse(['message' => $e->getMessage()], 404);
             }
         });
+    }
+
+    public function spentTime()
+    {
+        return microtime() - $this->timerStart;
     }
 }
