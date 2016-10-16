@@ -1,7 +1,7 @@
 App console
 ====
 
-```
+```php
 <?php
 
 namespace me\app;
