@@ -3,10 +3,13 @@ App install
 
 ## Register the controller
 
-$app->get('/install', 'me.app.ctrl.install');
+```php
 $app['me.app.ctrl.install'] = function(Container $c) {
   return new me\app\controller\InstallController($c['dbs']['default']);
 };
+
+$app->get('/install', 'me.app.ctrl.install');
+```
 
 ## Define the controller
 
