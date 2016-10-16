@@ -3,6 +3,8 @@
 ```php
 <?php
 
+# Access connection: $db = $app['dbs']['default'];
+
 return call_user_function() {
   return [
     'db.options' => [
@@ -22,6 +24,10 @@ return call_user_function() {
 
 ```php
 <?php
+
+# Access connections:
+# $master = $app['dbs']['default'];
+# $slave = $app['dbs']['slave'];
 
 return call_user_function() {
   return [
