@@ -17,6 +17,9 @@ class App extends Application
 
     public function __construct(array $values = [])
     {
+        // Set default timezone.
+        date_default_timezone_set(isset($values['timezone']) ? $values['timezone'] : 'UTC');
+
         $this->timerStart = microtime();
 
         if (isset($values['dbOptions'])) {
