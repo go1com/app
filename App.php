@@ -68,26 +68,29 @@ class App extends Application
             }
         }
 
-        $this->error(function (Exception $e) {
-            if ($this['debug']) {
-                throw $e;
-            }
-
-            if ($e instanceof DBALException) {
-                $this['logger'] && $this['logger']->error($e->getMessage());
-                $message = $this['debug'] ? $e->getMessage() : 'Database error #' . $e->getCode();
-
-                return new JsonResponse(['message' => $message], 500);
-            }
-
-            if ($e instanceof MethodNotAllowedException) {
-                return new JsonResponse(['message' => $e->getMessage()], 404);
-            }
-        });
+        $this->error([$this, 'onError']);
     }
 
     public function spentTime()
     {
         return microtime() - $this->timerStart;
+    }
+
+    public function onError(Exception $e)
+    {
+        if ($this['debug']) {
+            throw $e;
+        }
+
+        if ($e instanceof DBALException) {
+            $this['logger'] && $this['logger']->error($e->getMessage());
+            $message = $this['debug'] ? $e->getMessage() : 'Database error #' . $e->getCode();
+
+            return new JsonResponse(['message' => $message], 500);
+        }
+
+        if ($e instanceof MethodNotAllowedException) {
+            return new JsonResponse(['message' => $e->getMessage()], 404);
+        }
     }
 }
