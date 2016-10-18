@@ -20,6 +20,11 @@ class App extends Application
         // Set default timezone.
         date_default_timezone_set(isset($values['timezone']) ? $values['timezone'] : 'UTC');
 
+        // Make sure errors are hidden if debug is off.
+        $debug = isset($values['debug']) ? $values['debug'] : false;
+        error_reporting($debug ? E_ALL : 0);
+        ini_set('display_errors', $debug);
+
         $this->timerStart = microtime();
 
         if (isset($values['dbOptions'])) {
@@ -45,7 +50,7 @@ class App extends Application
 
         parent::__construct($values);
 
-        $this->register(new CoreServiceProvider());
+        $this->register(new CoreServiceProvider);
         $this->providers[] = $this['middleware.core'];
         $this->providers[] = $this['middleware.jwt'];
 
@@ -69,8 +74,8 @@ class App extends Application
 
             if ($e instanceof DBALException) {
                 $this['logger'] && $this['logger']->error($e->getMessage());
-
                 $message = $this['debug'] ? $e->getMessage() : 'Database error #' . $e->getCode();
+
                 return new JsonResponse(['message' => $message], 500);
             }
 
