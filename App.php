@@ -20,14 +20,22 @@ class App extends Application
         // Set default timezone.
         date_default_timezone_set(isset($values['timezone']) ? $values['timezone'] : 'UTC');
 
+        // Helper variable to track spent time.
+        $this->timerStart = microtime();
+
+        // Remove _DOCKER_  prefix from env variables.
+        foreach ($_ENV as $k => &$v) {
+            if (0 === strpos($k, '_DOCKER_')) {
+                putenv(substr($k, 8) . '=' . $v);
+            }
+        }
+
         // Make sure errors are hidden if debug is off.
         $debug = isset($values['debug']) ? $values['debug'] : false;
         $debug = class_exists('PHPUnit_Framework_MockObject_MockBuilder', false) ? true : $debug;
         $values['debug'] = $debug;
         error_reporting($debug ? E_ALL : 0);
         ini_set('display_errors', $debug);
-
-        $this->timerStart = microtime();
 
         if (isset($values['dbOptions'])) {
             if (isset($values['dbOptions']['driver'])) {
