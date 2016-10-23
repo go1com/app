@@ -47,20 +47,24 @@ class LoggerServiceTest extends PHPUnit_Framework_TestCase
         $this->assertNull($app['logger']);
     }
 
-    public function testDBALExceptionLog() {
+    public function testDBALExceptionLog()
+    {
         $app = new App([
             'routes' => [
-                ['GET', '/', function() {
+                ['GET', '/', function () {
                     throw new DBALException('foo message');
-                }]
-            ]
+                }],
+            ],
         ]);
+
+        $app['debug'] = false;
         $app['logger'] = function () {
             $logger = $this
                 ->getMockBuilder(Logger::class)
                 ->disableOriginalConstructor()
                 ->setMethods(['error', 'pushHandler', 'addRecord'])
                 ->getMock();
+
             $logger
                 ->expects($this->once())
                 ->method('error')
