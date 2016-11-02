@@ -3,33 +3,33 @@
 namespace go1\app;
 
 use PHPUnit_Framework_TestCase;
-use Symfony\Component\EventDispatcher\Event;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class AppTest extends PHPUnit_Framework_TestCase
 {
-    public function testAppInit()
+    /**
+     * @return App
+     */
+    protected function getApp()
     {
-        $app = require __DIR__ . '/../public/index.php';
-
-        $this->assertTrue($app instanceof App, 'App can be initialised without issue.');
-
-        return $app;
+        return require __DIR__ . '/../public/index.php';
     }
 
-    /**
-     * @depends testAppInit
-     */
-    public function testDefaultRoute(App $app)
+    public function testAppInit()
     {
+        $this->assertTrue($this->getApp() instanceof App, 'App can be initialised without issue.');
+    }
+
+    public function testDefaultRoute()
+    {
+        $app = $this->getApp();
         $app['time'] = time();
 
-        /** @var JsonResponse $response */
-        $response = $app->handle(Request::create('/'));
+        /** @var JsonResponse $res */
+        $res = $app->handle(Request::create('/'));
 
-        $this->assertTrue($response instanceof JsonResponse);
-        $this->assertJsonStringEqualsJsonString('{"time": "' . $app['time'] . '"}', $response->getContent());
+        $this->assertTrue($res instanceof JsonResponse);
+        $this->assertJsonStringEqualsJsonString('{"time": "' . $app['time'] . '"}', $res->getContent());
     }
 }

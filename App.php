@@ -4,9 +4,12 @@ namespace go1\app;
 
 use Doctrine\DBAL\DBALException;
 use Exception;
+use go1\app\domain\TerminateAwareJsonResponse;
 use go1\app\providers\CoreServiceProvider;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
 class App extends Application
@@ -100,6 +103,17 @@ class App extends Application
 
         if ($e instanceof MethodNotAllowedException) {
             return new JsonResponse(['message' => $e->getMessage()], 404);
+        }
+    }
+
+    public function terminate(Request $req, Response $res)
+    {
+        parent::terminate($req, $res);
+
+        if ($res instanceof TerminateAwareJsonResponse) {
+            foreach ($res->terminateCallbacks() as &$callback) {
+                $callback($req, $res);
+            }
         }
     }
 }
