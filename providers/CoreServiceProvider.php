@@ -6,6 +6,7 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\FilesystemCache;
 use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
+use Doctrine\Common\Cache\RedisCache;
 use go1\jwt_middleware\JwtMiddleware;
 use GuzzleHttp\Client;
 use Memcache;
@@ -16,6 +17,7 @@ use PHPUnit_Framework_TestCase;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Log\LogLevel;
+use Redis;
 use RuntimeException;
 use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
@@ -54,6 +56,7 @@ class CoreServiceProvider implements ServiceProviderInterface
                 case 'memcache':
                 case 'memcached':
                 case 'filesystem':
+                case 'redis':
                     return class_exists(PHPUnit_Framework_TestCase::class, false) ? $c["cache.array"] : $c["cache.{$backend}"];
 
                 default:
@@ -100,6 +103,23 @@ class CoreServiceProvider implements ServiceProviderInterface
 
             $cache = new MemcachedCache();
             $cache->setMemcached($memcached);
+
+            return $cache;
+        };
+        
+        $c['cache.redis'] = function (Container $c) {
+            if (!class_exists('Redis')) {
+                throw new RuntimeException('Missing caching driver.');
+            }
+
+            $name = isset($c['cacheOptions']['name']) ? $c['cacheOptions']['name'] : null;
+            $host = $c['cacheOptions']['host'];
+            $port = $c['cacheOptions']['port'];
+            $redis = new Redis($name);
+            $redis->connect($host, $port);
+
+            $cache = new RedisCache();
+            $cache->setRedis($redis);
 
             return $cache;
         };
