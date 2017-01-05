@@ -60,6 +60,10 @@ class CoreServiceProvider implements ServiceProviderInterface
                     return class_exists(PHPUnit_Framework_TestCase::class, false) ? $c["cache.array"] : $c["cache.{$backend}"];
 
                 default:
+                    if ($c->offsetExists("cache.{$backend}")) {
+                        return $c["cache.{$backend}"];
+                    }
+
                     throw new RuntimeException('Unsupported backend: ' . $c['cacheOptions']['backend']);
             }
         };
