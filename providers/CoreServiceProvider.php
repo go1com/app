@@ -9,6 +9,9 @@ use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\Cache\RedisCache;
 use go1\jwt_middleware\JwtMiddleware;
 use GuzzleHttp\Client;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use Memcache;
 use Memcached;
 use Monolog\Handler\ErrorLogHandler;
@@ -16,6 +19,7 @@ use Monolog\Logger;
 use PHPUnit_Framework_TestCase;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Log\LogLevel;
 use Redis;
 use RuntimeException;
@@ -146,8 +150,24 @@ class CoreServiceProvider implements ServiceProviderInterface
 
     private function registerClientService(Container $c)
     {
+        $c['client.handler.map-request'] = function () {
+            return Middleware::mapRequest(function (RequestInterface $request) {
+                if (isset($_SERVER['HTTP_X_REQUEST_ID'])) {
+                    return $request->withHeader('X-Request-ID', $_SERVER['HTTP_X_REQUEST_ID']);
+                }
+                return $request->withHeader('X-Request-ID', 'N/A');
+            });
+        };
+
         $c['client'] = function (Container $c) {
-            return new Client($c['clientOptions']);
+            $options = $c['clientOptions'];
+
+            $stack = new HandlerStack();
+            $stack->setHandler(new CurlHandler());
+            $stack->push($c['client.handler.map-request']);
+
+            $options['handler'] = $stack;
+            return new Client($options);
         };
     }
 }
