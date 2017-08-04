@@ -16,7 +16,7 @@ use Memcache;
 use Memcached;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Psr\Http\Message\RequestInterface;
@@ -61,7 +61,7 @@ class CoreServiceProvider implements ServiceProviderInterface
                 case 'memcached':
                 case 'filesystem':
                 case 'redis':
-                    return class_exists(PHPUnit_Framework_TestCase::class, false) ? $c["cache.array"] : $c["cache.{$backend}"];
+                    return class_exists(TestCase::class, false) ? $c["cache.array"] : $c["cache.{$backend}"];
 
                 default:
                     if ($c->offsetExists("cache.{$backend}")) {
