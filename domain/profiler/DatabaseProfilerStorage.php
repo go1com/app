@@ -18,27 +18,33 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
         $this->db = $db;
     }
 
-    public function install(Schema $schema)
+    public function install()
     {
-        if ($schema->hasTable('profiler_items')) {
-            $table = $schema->createTable('profiler_items');
-            $table->addColumn('token', Type::STRING);
-            $table->addColumn('ip', Type::STRING);
-            $table->addColumn('method', Type::STRING);
-            $table->addColumn('url', Type::STRING);
-            $table->addColumn('time', Type::INTEGER);
-            $table->addColumn('parent', Type::STRING);
-            $table->addColumn('status_code', Type::STRING);
-            $table->addColumn('data', Type::BLOB);
-            $table->addColumn('children', Type::STRING);
-            $table->setPrimaryKey(['token']);
-            $table->addIndex(['ip']);
-            $table->addIndex(['method']);
-            $table->addIndex(['url']);
-            $table->addIndex(['time']);
-            $table->addIndex(['parent']);
-            $table->addIndex(['status_code']);
-        }
+        DB::install(
+            $this->db, [
+                function (Schema $schema) {
+                    if (!$schema->hasTable('profiler_items')) {
+                        $table = $schema->createTable('profiler_items');
+                        $table->addColumn('token', Type::STRING);
+                        $table->addColumn('ip', Type::STRING);
+                        $table->addColumn('method', Type::STRING);
+                        $table->addColumn('url', Type::STRING);
+                        $table->addColumn('time', Type::INTEGER);
+                        $table->addColumn('parent', Type::STRING, ['notnull' => false]);
+                        $table->addColumn('status_code', Type::STRING);
+                        $table->addColumn('data', Type::BLOB);
+                        $table->addColumn('children', Type::STRING);
+                        $table->setPrimaryKey(['token']);
+                        $table->addIndex(['ip']);
+                        $table->addIndex(['method']);
+                        $table->addIndex(['url']);
+                        $table->addIndex(['time']);
+                        $table->addIndex(['parent']);
+                        $table->addIndex(['status_code']);
+                    }
+                },
+            ]
+        );
     }
 
     public function find($ip, $url, $limit, $method, $start = null, $end = null)
@@ -59,7 +65,8 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
         $q = $q->execute();
 
         while ($row = $q->fetch(DB::OBJ)) {
-            $row->data = json_decode($row->data);
+            $row->data = unserialize($row->data);
+            $row->children = unserialize($row->children);
             $rows[] = $row;
         }
 
@@ -68,7 +75,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
 
     public function write(Profile $profile)
     {
-        $this->db->insert('profiler_items', [
+        $fields = [
             'token'       => $profile->getToken(),
             'ip'          => $profile->getIp(),
             'method'      => $profile->getMethod(),
@@ -76,8 +83,8 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
             'time'        => $profile->getTime(),
             'parent'      => $profile->getParentToken(),
             'status_code' => $profile->getStatusCode(),
-            'data'        => $profile->getCollectors(),
-            'children'    => json_encode(
+            'data'        => serialize($profile->getCollectors()),
+            'children'    => serialize(
                 array_map(
                     function (Profile $p) {
                         return $p->getToken();
@@ -85,7 +92,9 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
                     $profile->getChildren()
                 )
             ),
-        ]);
+        ];
+
+        $this->db->insert('profiler_items', $fields);
     }
 
     public function purge()
