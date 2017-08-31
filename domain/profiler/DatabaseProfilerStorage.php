@@ -20,23 +20,25 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
 
     public function install(Schema $schema)
     {
-        $table = $schema->createTable('profiler_items');
-        $table->addColumn('token', Type::STRING);
-        $table->addColumn('ip', Type::STRING);
-        $table->addColumn('method', Type::STRING);
-        $table->addColumn('url', Type::STRING);
-        $table->addColumn('time', Type::INTEGER);
-        $table->addColumn('parent', Type::STRING);
-        $table->addColumn('status_code', Type::STRING);
-        $table->addColumn('data', Type::BLOB);
-        $table->addColumn('children', Type::STRING);
-        $table->setPrimaryKey(['token']);
-        $table->addIndex(['ip']);
-        $table->addIndex(['method']);
-        $table->addIndex(['url']);
-        $table->addIndex(['time']);
-        $table->addIndex(['parent']);
-        $table->addIndex(['status_code']);
+        if ($schema->hasTable('profiler_items')) {
+            $table = $schema->createTable('profiler_items');
+            $table->addColumn('token', Type::STRING);
+            $table->addColumn('ip', Type::STRING);
+            $table->addColumn('method', Type::STRING);
+            $table->addColumn('url', Type::STRING);
+            $table->addColumn('time', Type::INTEGER);
+            $table->addColumn('parent', Type::STRING);
+            $table->addColumn('status_code', Type::STRING);
+            $table->addColumn('data', Type::BLOB);
+            $table->addColumn('children', Type::STRING);
+            $table->setPrimaryKey(['token']);
+            $table->addIndex(['ip']);
+            $table->addIndex(['method']);
+            $table->addIndex(['url']);
+            $table->addIndex(['time']);
+            $table->addIndex(['parent']);
+            $table->addIndex(['status_code']);
+        }
     }
 
     public function find($ip, $url, $limit, $method, $start = null, $end = null)
