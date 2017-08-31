@@ -56,7 +56,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
             ->from('profiler_items')
             ->setMaxResults($limit)
             ->setFirstResult($start)
-            ->orderBy('id', 'DESC');
+            ->orderBy('time', 'DESC');
 
         $ip && $q->andWhere('ip = :ip')->setParameter(':ip', $ip);
         $url && $q->andWhere('url = :url')->setParameter(':url', $url);
@@ -115,8 +115,10 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
             ->db
             ->executeQuery('SELECT * FROM profiler_items WHERE token IN (?)', [$tokens], [DB::STRINGS]);
 
-        while ($row = $q->fetch(DB::OBJ)) {
-            $rows[] = $this->createProfileFromData($row->token, $row);
+        while ($row = $q->fetch(DB::ARR)) {
+            $row['data'] = unserialize($row['data']);
+            $row['children'] = unserialize($row['children']);
+            $rows[] = $this->createProfileFromData($row['token'], $row);
         }
 
         return $rows ?? [];
@@ -140,8 +142,8 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
             $profile->setParent($parent);
         }
 
-        if ($data->children) {
-            foreach ($this->readMultiple(json_decode($data->children)) as $_) {
+        if ($data['children']) {
+            foreach ($this->readMultiple(json_decode($data['children'])) as $_) {
                 $profile->addChild($_);
             }
         }
