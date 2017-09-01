@@ -7,6 +7,10 @@ use Doctrine\Common\Cache\FilesystemCache;
 use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\Cache\RedisCache;
+use go1\app\App;
+use go1\app\domain\profiler\DatabaseProfilerStorage;
+use go1\app\domain\profiler\GuzzleDataCollector;
+use go1\app\domain\profiler\GuzzleHistory;
 use go1\jwt_middleware\JwtMiddleware;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\CurlHandler;
@@ -25,6 +29,16 @@ use Redis;
 use RuntimeException;
 use Silex\Provider\DoctrineServiceProvider;
 use Silex\Provider\ServiceControllerServiceProvider;
+use Symfony\Component\HttpKernel\DataCollector\ConfigDataCollector;
+use Symfony\Component\HttpKernel\DataCollector\EventDataCollector;
+use Symfony\Component\HttpKernel\DataCollector\ExceptionDataCollector;
+use Symfony\Component\HttpKernel\DataCollector\LoggerDataCollector;
+use Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector;
+use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector;
+use Symfony\Component\HttpKernel\DataCollector\RouterDataCollector;
+use Symfony\Component\HttpKernel\DataCollector\TimeDataCollector;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
+use Symfony\Component\Stopwatch\Stopwatch;
 
 class CoreServiceProvider implements ServiceProviderInterface
 {
@@ -114,7 +128,7 @@ class CoreServiceProvider implements ServiceProviderInterface
 
             return $cache;
         };
-        
+
         $c['cache.redis'] = function (Container $c) {
             if (!class_exists('Redis')) {
                 throw new RuntimeException('Missing caching driver.');
@@ -155,19 +169,83 @@ class CoreServiceProvider implements ServiceProviderInterface
                 if (isset($_SERVER['HTTP_X_REQUEST_ID'])) {
                     return $request->withHeader('X-Request-ID', $_SERVER['HTTP_X_REQUEST_ID']);
                 }
+
                 return $request->withHeader('X-Request-ID', 'N/A');
             });
         };
 
+        $c['client.history'] = function () {
+            return new GuzzleHistory(new Stopwatch);
+        };
+
         $c['client'] = function (Container $c) {
             $options = $c['clientOptions'];
-
-            $stack = new HandlerStack();
-            $stack->setHandler(new CurlHandler());
+            $stack = new HandlerStack;
+            $stack->setHandler(new CurlHandler);
             $stack->push($c['client.handler.map-request']);
-
             $options['handler'] = $stack;
-            return new Client($options);
+
+            if ($c->offsetExists('profiler.do')) {
+                $stack = new HandlerStack;
+                $stack->setHandler(new CurlHandler);
+                $stack->push($c['client.history']);
+            }
+
+            $client = new Client($options);
+
+            return $client;
         };
+
+        if ($c->offsetExists('profiler.do')) {
+            $c['profiler.storage'] = function (Container $c) {
+                return new DatabaseProfilerStorage($c['dbs']['profiler']);
+            };
+
+            $c['profiler.collectors.guzzle'] = function (Container $c) {
+                return new GuzzleDataCollector($c['client.history']);
+            };
+
+            $c['profiler.collectors'] = function (Container $c) {
+                return [
+                    'config'    => function () {
+                        return new ConfigDataCollector('GO1', App::NAME . App::VERSION);
+                    },
+                    'request'   => function () {
+                        return new RequestDataCollector;
+                    },
+                    'exception' => function () {
+                        return new ExceptionDataCollector;
+                    },
+                    'events'    => function ($c) {
+                        return new EventDataCollector($c['dispatcher']);
+                    },
+                    'logger'    => function ($c) {
+                        return new LoggerDataCollector($c['logger']);
+                    },
+                    'time'      => function () {
+                        return new TimeDataCollector(null, new Stopwatch);
+                    },
+                    'router'    => function () {
+                        return new RouterDataCollector;
+                    },
+                    'memory'    => function () {
+                        return new MemoryDataCollector;
+                    },
+                    'guzzle'    => function ($c) {
+                        return $c['profiler.collectors.guzzle'];
+                    },
+                ];
+            };
+
+            $c['profiler'] = function (Container $c) {
+                $profiler = new Profiler($c['profiler.storage'], $c['logger']);
+
+                foreach ($c['profiler.collectors'] as $collector) {
+                    $profiler->add($collector($c));
+                }
+
+                return $profiler;
+            };
+        }
     }
 }

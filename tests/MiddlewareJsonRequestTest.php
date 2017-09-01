@@ -3,11 +3,11 @@
 namespace go1\app\tests;
 
 use go1\app\App;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class MiddlewareJsonRequestTest extends PHPUnit_Framework_TestCase
+class MiddlewareJsonRequestTest extends TestCase
 {
     public function testJsonBodyToRequestObject()
     {

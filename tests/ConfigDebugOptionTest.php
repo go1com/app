@@ -4,11 +4,11 @@ namespace go1\app\tests;
 
 use DomainException;
 use go1\app\App;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class ConfigDebugOptionTest extends PHPUnit_Framework_TestCase
+class ConfigDebugOptionTest extends TestCase
 {
     public function testConfigDebugOn()
     {

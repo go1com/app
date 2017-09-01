@@ -3,11 +3,11 @@
 namespace go1\app\tests;
 
 use go1\app\App;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class EventTest extends PHPUnit_Framework_TestCase
+class EventTest extends TestCase
 {
     public function testEventListener()
     {

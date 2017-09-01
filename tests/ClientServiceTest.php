@@ -9,11 +9,10 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 
-
-class ClientServiceTest extends PHPUnit_Framework_TestCase
+class ClientServiceTest extends TestCase
 {
     public function test()
     {
@@ -38,8 +37,9 @@ class ClientServiceTest extends PHPUnit_Framework_TestCase
         $h = new MockHandler([
             function (RequestInterface $request, array $options) {
                 $this->assertEquals('Foo-Bar', $request->getHeaderLine('X-Request-ID'));
+
                 return new Response(200);
-            }
+            },
         ]);
 
         $stack = new HandlerStack($h);

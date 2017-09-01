@@ -4,8 +4,9 @@ namespace go1\app\tests;
 
 use Doctrine\DBAL\Connection;
 use go1\app\App;
+use PHPUnit\Framework\TestCase;
 
-class MultipleConnectionsTest extends \PHPUnit_Framework_TestCase
+class MultipleConnectionsTest extends TestCase
 {
     public function testSingle()
     {

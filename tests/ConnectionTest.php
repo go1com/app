@@ -4,8 +4,9 @@ namespace go1\app;
 
 use Doctrine\DBAL\Connection;
 use go1\app\tests\mocks\MockConnection;
+use PHPUnit\Framework\TestCase;
 
-class ConnectionTest extends \PHPUnit_Framework_TestCase
+class ConnectionTest extends TestCase
 {
     public function testInsertQuery()
     {

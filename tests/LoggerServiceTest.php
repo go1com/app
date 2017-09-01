@@ -6,12 +6,12 @@ use Doctrine\DBAL\DBALException;
 use go1\app\App;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\HttpFoundation\Request;
 
-class LoggerServiceTest extends PHPUnit_Framework_TestCase
+class LoggerServiceTest extends TestCase
 {
     public function test()
     {

@@ -5,9 +5,9 @@ namespace go1\app\tests;
 use Doctrine\Common\Cache\CacheProvider;
 use go1\app\App;
 use go1\app\tests\mocks\CustomCacheBackend;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class CacheServiceTest extends PHPUnit_Framework_TestCase
+class CacheServiceTest extends TestCase
 {
     public function test()
     {

@@ -2,11 +2,11 @@
 
 namespace go1\app;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class AppTest extends PHPUnit_Framework_TestCase
+class AppTest extends TestCase
 {
     /**
      * @return App
