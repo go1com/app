@@ -25,11 +25,10 @@ class AppTest extends PHPUnit_Framework_TestCase
     {
         $app = $this->getApp();
         $app['time'] = time();
-
-        /** @var JsonResponse $res */
         $res = $app->handle(Request::create('/'));
+        $time = json_decode($res->getContent())->time;
 
         $this->assertTrue($res instanceof JsonResponse);
-        $this->assertJsonStringEqualsJsonString('{"time": "' . $app['time'] . '"}', $res->getContent());
+        $this->assertTrue($time >= $app['time']);
     }
 }
