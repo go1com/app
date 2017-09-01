@@ -25,15 +25,20 @@ class GuzzleHistory
 
             return $promise->then(
                 function (ResponseInterface $res) use ($id, $req) {
-                    $stopwatch = $this->stopwatch->stop($id);
-
                     $this->log[] = [
                         'request'   => $req,
                         'response'  => $res,
-                        'stopwatch' => $stopwatch,
+                        'stopwatch' => $this->stopwatch->stop($id),
                     ];
+
+                    return $res;
                 }
             );
         };
+    }
+
+    public function history()
+    {
+        return $this->log;
     }
 }

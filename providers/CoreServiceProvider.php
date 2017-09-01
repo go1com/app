@@ -164,26 +164,12 @@ class CoreServiceProvider implements ServiceProviderInterface
 
     private function registerProfilerServices(Container $c)
     {
-        $c['client.handler.map-request'] = function () {
-            return Middleware::mapRequest(function (RequestInterface $request) {
-                if (isset($_SERVER['HTTP_X_REQUEST_ID'])) {
-                    return $request->withHeader('X-Request-ID', $_SERVER['HTTP_X_REQUEST_ID']);
-                }
-
-                return $request->withHeader('X-Request-ID', 'N/A');
-            });
-        };
-
-        $c['client.history'] = function () {
-            return new GuzzleHistory(new Stopwatch);
-        };
-
         $c['profiler.storage'] = function (Container $c) {
             return new DatabaseProfilerStorage($c['dbs']['profiler']);
         };
 
         $c['profiler.collectors.guzzle'] = function (Container $c) {
-            return new GuzzleDataCollector($c['client.history']);
+            return new GuzzleDataCollector($c['client.middleware.profiler']);
         };
 
         $c['profiler.collectors'] = function (Container $c) {
@@ -228,22 +214,29 @@ class CoreServiceProvider implements ServiceProviderInterface
 
     private function registerClientService(Container $c)
     {
+        $c['client.middleware.map-request'] = function () {
+            return Middleware::mapRequest(function (RequestInterface $req) {
+                if (isset($_SERVER['HTTP_X_REQUEST_ID'])) {
+                    return $req->withHeader('X-Request-ID', $_SERVER['HTTP_X_REQUEST_ID']);
+                }
+
+                return $req->withHeader('X-Request-ID', 'N/A');
+            });
+        };
+
+        $c['client.middleware.profiler'] = function () {
+            return new GuzzleHistory(new Stopwatch);
+        };
+
         $c['client'] = function (Container $c) {
             $options = $c['clientOptions'];
-            $stack = new HandlerStack;
-            $stack->setHandler(new CurlHandler);
-            $stack->push($c['client.handler.map-request']);
+            $stack = HandlerStack::create(new CurlHandler);
+            $stack->push($c['client.middleware.map-request']);
             $options['handler'] = $stack;
 
-            if ($c->offsetExists('profiler.do')) {
-                $stack = new HandlerStack;
-                $stack->setHandler(new CurlHandler);
-                $stack->push($c['client.history']);
-            }
+            $c->offsetExists('profiler.do') && $stack->push($c['client.middleware.profiler'], 'go1.profiler');
 
-            $client = new Client($options);
-
-            return $client;
+            return new Client($options);
         };
     }
 }
