@@ -64,9 +64,9 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
         $end && $q->andWhere('time <= :end')->setParameter(':end', $end);
         $q = $q->execute();
 
-        while ($row = $q->fetch(DB::OBJ)) {
-            $row->data = unserialize($row->data);
-            $row->children = unserialize($row->children);
+        while ($row = $q->fetch(DB::ARR)) {
+            $row['data'] = unserialize($row['data']);
+            $row['children'] = unserialize($row['children']);
             $rows[] = $row;
         }
 

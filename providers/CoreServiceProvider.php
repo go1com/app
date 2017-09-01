@@ -35,7 +35,6 @@ use Symfony\Component\HttpKernel\DataCollector\ExceptionDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\LoggerDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector;
-use Symfony\Component\HttpKernel\DataCollector\RouterDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\TimeDataCollector;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Stopwatch\Stopwatch;
@@ -55,6 +54,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         $c->offsetExists('cacheOptions') && $this->registerCacheServices($c);
         $c->offsetExists('logOptions') && $this->registerLogServices($c);
         $c->offsetExists('clientOptions') && $this->registerClientService($c);
+        $this->registerProfilerServices($c);
 
         $c['middleware.jwt'] = function () {
             return new JwtMiddleware;
@@ -162,7 +162,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         };
     }
 
-    private function registerClientService(Container $c)
+    private function registerProfilerServices(Container $c)
     {
         $c['client.handler.map-request'] = function () {
             return Middleware::mapRequest(function (RequestInterface $request) {
@@ -178,6 +178,56 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new GuzzleHistory(new Stopwatch);
         };
 
+        $c['profiler.storage'] = function (Container $c) {
+            return new DatabaseProfilerStorage($c['dbs']['profiler']);
+        };
+
+        $c['profiler.collectors.guzzle'] = function (Container $c) {
+            return new GuzzleDataCollector($c['client.history']);
+        };
+
+        $c['profiler.collectors'] = function (Container $c) {
+            return [
+                'config'    => function () {
+                    return new ConfigDataCollector('GO1', App::NAME . App::VERSION);
+                },
+                'request'   => function () {
+                    return new RequestDataCollector;
+                },
+                'exception' => function () {
+                    return new ExceptionDataCollector;
+                },
+                'events'    => function ($c) {
+                    return new EventDataCollector($c['dispatcher']);
+                },
+                'logger'    => function ($c) {
+                    return new LoggerDataCollector($c['logger']);
+                },
+                'time'      => function () {
+                    return new TimeDataCollector(null, new Stopwatch);
+                },
+                'memory'    => function () {
+                    return new MemoryDataCollector;
+                },
+                'guzzle'    => function ($c) {
+                    return $c['profiler.collectors.guzzle'];
+                },
+            ];
+        };
+
+        $c['profiler'] = function (Container $c) {
+            $profiler = new Profiler($c['profiler.storage'], $c['logger']);
+
+            foreach ($c['profiler.collectors'] as $collector) {
+                $profiler->add($collector($c));
+            }
+
+            return $profiler;
+        };
+    }
+
+    private function registerClientService(Container $c)
+    {
         $c['client'] = function (Container $c) {
             $options = $c['clientOptions'];
             $stack = new HandlerStack;
@@ -195,57 +245,5 @@ class CoreServiceProvider implements ServiceProviderInterface
 
             return $client;
         };
-
-        if ($c->offsetExists('profiler.do')) {
-            $c['profiler.storage'] = function (Container $c) {
-                return new DatabaseProfilerStorage($c['dbs']['profiler']);
-            };
-
-            $c['profiler.collectors.guzzle'] = function (Container $c) {
-                return new GuzzleDataCollector($c['client.history']);
-            };
-
-            $c['profiler.collectors'] = function (Container $c) {
-                return [
-                    'config'    => function () {
-                        return new ConfigDataCollector('GO1', App::NAME . App::VERSION);
-                    },
-                    'request'   => function () {
-                        return new RequestDataCollector;
-                    },
-                    'exception' => function () {
-                        return new ExceptionDataCollector;
-                    },
-                    'events'    => function ($c) {
-                        return new EventDataCollector($c['dispatcher']);
-                    },
-                    'logger'    => function ($c) {
-                        return new LoggerDataCollector($c['logger']);
-                    },
-                    'time'      => function () {
-                        return new TimeDataCollector(null, new Stopwatch);
-                    },
-                    'router'    => function () {
-                        return new RouterDataCollector;
-                    },
-                    'memory'    => function () {
-                        return new MemoryDataCollector;
-                    },
-                    'guzzle'    => function ($c) {
-                        return $c['profiler.collectors.guzzle'];
-                    },
-                ];
-            };
-
-            $c['profiler'] = function (Container $c) {
-                $profiler = new Profiler($c['profiler.storage'], $c['logger']);
-
-                foreach ($c['profiler.collectors'] as $collector) {
-                    $profiler->add($collector($c));
-                }
-
-                return $profiler;
-            };
-        }
     }
 }
