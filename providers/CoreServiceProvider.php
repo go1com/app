@@ -53,7 +53,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         // Auto register doctrine DBAL service provider if the app needs it. Documentation: http://silex.sensiolabs.org/doc/providers/doctrine.html
         $c->offsetExists('db.options') && $c->register(new DoctrineServiceProvider, ['db.options' => $c['db.options']]);
         $c->offsetExists('dbs.options') && $c->register(new DoctrineServiceProvider, ['dbs.options' => $c['dbs.options']]);
-        if ($c->offsetExists('profiler.do')) {
+        if ($c->offsetExists('profiler.do') && $c->offsetGet('profiler.do')) {
             /** @var DoctrineDataCollector $collector */
             $collector = $c['profiler.collectors.db'];
 
@@ -262,7 +262,9 @@ class CoreServiceProvider implements ServiceProviderInterface
             $stack->push($c['client.middleware.map-request']);
             $options['handler'] = $stack;
 
-            $c->offsetExists('profiler.do') && $stack->push($c['client.middleware.profiler'], 'go1.profiler');
+            if ($c->offsetExists('profiler.do') && $c->offsetGet('profiler.do')) {
+                $stack->push($c['client.middleware.profiler'], 'go1.profiler');
+            }
 
             return new Client($options);
         };
