@@ -43,7 +43,7 @@ class ClientServiceTest extends TestCase
         ]);
 
         $stack = new HandlerStack($h);
-        $stack->push($app['client.handler.map-request']);
+        $stack->push($app['client.middleware.map-request']);
 
         $comp = $stack->resolve();
         $p = $comp(new Request('PUT', 'http://www.google.com'), []);
