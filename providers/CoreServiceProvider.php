@@ -7,8 +7,12 @@ use Doctrine\Common\Cache\FilesystemCache;
 use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\Cache\RedisCache;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Logging\DebugStack;
+use Doctrine\DBAL\Logging\LoggerChain;
 use go1\app\App;
 use go1\app\domain\profiler\DatabaseProfilerStorage;
+use go1\app\domain\profiler\DoctrineDataCollector;
 use go1\app\domain\profiler\GuzzleDataCollector;
 use go1\app\domain\profiler\GuzzleHistory;
 use go1\jwt_middleware\JwtMiddleware;
@@ -49,6 +53,19 @@ class CoreServiceProvider implements ServiceProviderInterface
         // Auto register doctrine DBAL service provider if the app needs it. Documentation: http://silex.sensiolabs.org/doc/providers/doctrine.html
         $c->offsetExists('db.options') && $c->register(new DoctrineServiceProvider, ['db.options' => $c['db.options']]);
         $c->offsetExists('dbs.options') && $c->register(new DoctrineServiceProvider, ['dbs.options' => $c['dbs.options']]);
+        if ($c->offsetExists('profiler.do')) {
+            /** @var DoctrineDataCollector $collector */
+            $collector = $c['profiler.collectors.db'];
+
+            foreach ($c['dbs.options'] as $name => $params) {
+                /** @var Connection $db */
+                $db = $c['dbs'][$name];
+                $loggerChain = new LoggerChain;
+                $loggerChain->addLogger($logger = new DebugStack);
+                $db->getConfiguration()->setSQLLogger($loggerChain);
+                $collector->addLogger($name, $logger);
+            }
+        }
 
         // Custom services
         $c->offsetExists('cacheOptions') && $this->registerCacheServices($c);
@@ -172,7 +189,15 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new GuzzleDataCollector($c['client.middleware.profiler']);
         };
 
-        $c['profiler.collectors'] = function (Container $c) {
+        $c['profiler.collectors.db'] = function (Container $c) {
+            $connections = array_map(function ($name) use ($c) {
+                return $c['dbs'][$name];
+            }, $c['dbs']->keys());
+
+            return new DoctrineDataCollector($connections);
+        };
+
+        $c['profiler.collectors'] = function () {
             return [
                 'config'    => function () {
                     return new ConfigDataCollector('GO1', App::NAME . App::VERSION);
@@ -197,6 +222,9 @@ class CoreServiceProvider implements ServiceProviderInterface
                 },
                 'guzzle'    => function ($c) {
                     return $c['profiler.collectors.guzzle'];
+                },
+                'db'        => function ($c) {
+                    return $c['profiler.collectors.db'];
                 },
             ];
         };

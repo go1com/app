@@ -20,6 +20,19 @@ class GuzzleDataCollector extends DataCollector
     /**
      * {@inheritdoc}
      */
+    public function getName()
+    {
+        return 'guzzle';
+    }
+
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function collect(Request $request, Response $response, Exception $exception = null)
     {
         $data = [];
@@ -50,28 +63,5 @@ class GuzzleDataCollector extends DataCollector
         }
 
         $this->data = $data;
-    }
-
-    public function getData()
-    {
-        return $this->data;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
-    {
-        return 'guzzle';
-    }
-
-    private function collectTime(GuzzleRequestInterface $request)
-    {
-        $response = $request->getResponse();
-
-        return [
-            'total'      => $response->getInfo('total_time'),
-            'connection' => $response->getInfo('connect_time'),
-        ];
     }
 }

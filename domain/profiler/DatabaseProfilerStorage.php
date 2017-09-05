@@ -143,9 +143,9 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
         }
 
         if ($data['children']) {
-            foreach ($this->readMultiple(json_decode($data['children'])) as $_) {
-                $profile->addChild($_);
-            }
+            #foreach ($this->readMultiple($data['children']) as $_) {
+            #    $profile->addChild($_);
+            #}
         }
 
         return $profile;
