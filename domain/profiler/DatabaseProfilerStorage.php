@@ -83,7 +83,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
             'time'        => $profile->getTime(),
             'parent'      => $profile->getParentToken(),
             'status_code' => $profile->getStatusCode(),
-            'data'        => base64_encode(serialize($profile->getCollectors())),
+            'data'        => serialize($profile->getCollectors()),
             'children'    => serialize(
                 array_map(
                     function (Profile $p) {
@@ -116,7 +116,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
             ->executeQuery('SELECT * FROM profiler_items WHERE token IN (?)', [$tokens], [DB::STRINGS]);
 
         while ($row = $q->fetch(DB::ARR)) {
-            $row['data'] = unserialize(base64_decode($row['data']));
+            $row['data'] = unserialize($row['data']);
             $row['children'] = unserialize($row['children']);
             $rows[] = $this->createProfileFromData($row['token'], $row);
         }
