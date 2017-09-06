@@ -13,6 +13,7 @@ use Doctrine\DBAL\Logging\LoggerChain;
 use go1\app\App;
 use go1\app\domain\profiler\DatabaseProfilerStorage;
 use go1\app\domain\profiler\DoctrineDataCollector;
+use go1\app\domain\profiler\ElasticSearchDataCollector;
 use go1\app\domain\profiler\GuzzleDataCollector;
 use go1\app\domain\profiler\GuzzleHistory;
 use go1\jwt_middleware\JwtMiddleware;
@@ -187,35 +188,22 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new DoctrineDataCollector($connections);
         };
 
+        $c['profiler.collectors.es'] = function(Container $c) {
+            return new ElasticSearchDataCollector;
+        };
+
         $c['profiler.collectors'] = function () {
             return [
-                'config'    => function () {
-                    return new ConfigDataCollector('GO1', App::NAME . App::VERSION);
-                },
-                'request'   => function () {
-                    return new RequestDataCollector;
-                },
-                'exception' => function () {
-                    return new ExceptionDataCollector;
-                },
-                'events'    => function ($c) {
-                    return new EventDataCollector($c['dispatcher']);
-                },
-                'logger'    => function ($c) {
-                    return new LoggerDataCollector($c['logger']);
-                },
-                'time'      => function () {
-                    return new TimeDataCollector(null, new Stopwatch);
-                },
-                'memory'    => function () {
-                    return new MemoryDataCollector;
-                },
-                'guzzle'    => function ($c) {
-                    return $c['profiler.collectors.guzzle'];
-                },
-                'db'        => function ($c) {
-                    return $c['profiler.collectors.db'];
-                },
+                'config'    => function () { return new ConfigDataCollector('GO1', App::NAME . App::VERSION); },
+                'request'   => function () { return new RequestDataCollector;   },
+                'exception' => function () { return new ExceptionDataCollector; },
+                'events'    => function ($c) { return new EventDataCollector($c['dispatcher']); },
+                'logger'    => function ($c) { return new LoggerDataCollector($c['logger']); },
+                'time'      => function () { return new TimeDataCollector(null, new Stopwatch); },
+                'memory'    => function () { return new MemoryDataCollector; },
+                'guzzle'    => function ($c) { return $c['profiler.collectors.guzzle']; },
+                'db'        => function ($c) { return $c['profiler.collectors.db']; },
+                'es'        => function ($c) { return $c['profiler.collectors.es']; },
             ];
         };
 
