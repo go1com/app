@@ -13,7 +13,13 @@ class ElasticSearchDataCollector extends DataCollector implements LoggerInterfac
 {
     use LoggerTrait;
 
+    private $debug;
     private $history;
+
+    public function __construct(bool $debug)
+    {
+        $this->debug = $debug;
+    }
 
     public function getName()
     {
@@ -27,6 +33,16 @@ class ElasticSearchDataCollector extends DataCollector implements LoggerInterfac
 
     public function log($level, $message, array $context = [])
     {
-        $this->history[$level][] = [$message, $context];
+        switch ($level) {
+            case 'info':
+                $this->history[$level][] = [$message, $context];
+                break;
+
+            case 'debug':
+                if ($this->debug) {
+                    $this->history[$level][] = [$message, $context];
+                }
+                break;
+        }
     }
 }

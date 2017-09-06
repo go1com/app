@@ -189,7 +189,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         };
 
         $c['profiler.collectors.es'] = function(Container $c) {
-            return new ElasticSearchDataCollector;
+            return new ElasticSearchDataCollector($c['debug']);
         };
 
         $c['profiler.collectors'] = function () {
