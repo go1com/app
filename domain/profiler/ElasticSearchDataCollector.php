@@ -5,16 +5,17 @@ namespace go1\app\domain\profiler;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
+use Serializable;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 
-class ElasticSearchDataCollector extends DataCollector implements LoggerInterface
+class ElasticSearchDataCollector extends DataCollector implements LoggerInterface, Serializable
 {
     use LoggerTrait;
 
     private $debug;
-    private $history;
+    private $data;
 
     public function __construct(bool $debug)
     {
@@ -26,21 +27,32 @@ class ElasticSearchDataCollector extends DataCollector implements LoggerInterfac
         return 'es';
     }
 
+    public function serialize()
+    {
+        return serialize($this->data);
+    }
+
+    public function unserialize($data)
+    {
+        $this->data = unserialize($data);
+    }
+
     public function collect(Request $req, Response $res, Exception $exception = null)
     {
-        return $this->history;
+        return $this->data;
     }
 
     public function log($level, $message, array $context = [])
     {
         switch ($level) {
             case 'info':
-                $this->history[$level][] = [$message, $context];
+                $this->data[$level][] = [$message, $context];
                 break;
 
             case 'debug':
                 if ($this->debug) {
-                    $this->history[$level][] = [$message, $context];
+                    # Too much data.
+                    # $this->data[$level][] = [$message, $context];
                 }
                 break;
         }

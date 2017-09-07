@@ -220,7 +220,6 @@ class CoreServiceProvider implements ServiceProviderInterface
         if ($c->offsetExists('profiler.do') && $c->offsetGet('profiler.do')) {
             /** @var DoctrineDataCollector $collector */
             $collector = $c['profiler.collectors.db'];
-
             foreach ($c['dbs.options'] as $name => $params) {
                 /** @var Connection $db */
                 $db = $c['dbs'][$name];
