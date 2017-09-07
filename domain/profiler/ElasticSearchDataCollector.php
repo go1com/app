@@ -15,7 +15,6 @@ class ElasticSearchDataCollector extends DataCollector implements LoggerInterfac
     use LoggerTrait;
 
     private $debug;
-    private $data;
 
     public function __construct(bool $debug)
     {
@@ -25,16 +24,6 @@ class ElasticSearchDataCollector extends DataCollector implements LoggerInterfac
     public function getName()
     {
         return 'es';
-    }
-
-    public function serialize()
-    {
-        return serialize($this->data);
-    }
-
-    public function unserialize($data)
-    {
-        $this->data = unserialize($data);
     }
 
     public function collect(Request $req, Response $res, Exception $exception = null)
