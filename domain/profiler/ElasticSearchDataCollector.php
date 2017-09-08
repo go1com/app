@@ -28,7 +28,27 @@ class ElasticSearchDataCollector extends DataCollector implements LoggerInterfac
 
     public function getData()
     {
-        return $this->data;
+        if (isset($this->data['info'])) {
+            foreach ($this->data['info'] as &$info) {
+                if (!isset($info[1])) {
+                    continue;
+                }
+
+                if (isset($info[1]['uri']) && is_scalar($info[1]['uri'])) {
+                    $uri = Request::create(urldecode($info[1]['uri']));
+                    $info[1]['uri'] = [
+                        'scheme' => $uri->getScheme(),
+                        'host'   => $uri->getHost(),
+                        'path'   => $uri->getPathInfo(),
+                        'query'  => urldecode($uri->getQueryString()),
+                    ];
+                }
+
+                $data[] = $info[1];
+            }
+        }
+
+        return $data ?? [];
     }
 
     public function collect(Request $req, Response $res, Exception $exception = null)
