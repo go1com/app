@@ -26,6 +26,11 @@ class ElasticSearchDataCollector extends DataCollector implements LoggerInterfac
         return 'es';
     }
 
+    public function getData()
+    {
+        return $this->data;
+    }
+
     public function collect(Request $req, Response $res, Exception $exception = null)
     {
         return $this->data;
