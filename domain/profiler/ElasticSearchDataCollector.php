@@ -14,13 +14,6 @@ class ElasticSearchDataCollector extends DataCollector implements LoggerInterfac
 {
     use LoggerTrait;
 
-    private $debug;
-
-    public function __construct(bool $debug)
-    {
-        $this->debug = $debug;
-    }
-
     public function getName()
     {
         return 'es';
@@ -61,13 +54,6 @@ class ElasticSearchDataCollector extends DataCollector implements LoggerInterfac
         switch ($level) {
             case 'info':
                 $this->data[$level][] = [$message, $context];
-                break;
-
-            case 'debug':
-                if ($this->debug) {
-                    # Too much data.
-                    # $this->data[$level][] = [$message, $context];
-                }
                 break;
         }
     }
