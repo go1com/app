@@ -17,6 +17,11 @@ class RabbitMqDataCollector extends DataCollector implements LoggerInterface
         return 'mq';
     }
 
+    public function getData()
+    {
+        return $this->data;
+    }
+
     public function log($level, $message, array $context = [])
     {
         if ('debug' === $level) {
