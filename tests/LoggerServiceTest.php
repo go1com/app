@@ -37,7 +37,7 @@ class LoggerServiceTest extends TestCase
     {
         return [
             [['level' => LogLevel::INFO], Logger::INFO],
-            [[], Logger::ERROR],
+            [[], Logger::DEBUG],
         ];
     }
 

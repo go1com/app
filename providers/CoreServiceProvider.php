@@ -165,7 +165,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         };
 
         $c['logger.php_error'] = function (Container $c) {
-            $logLevel = isset($c['logOptions']['level']) ? $c['logOptions']['level'] : LogLevel::ERROR;
+            $logLevel = isset($c['logOptions']['level']) ? $c['logOptions']['level'] : LogLevel::DEBUG;
 
             return new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel);
         };
