@@ -6,6 +6,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Type;
 use go1\util\DB;
+use Symfony\Component\HttpKernel\DataCollector\TimeDataCollector;
 use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\HttpKernel\Profiler\ProfilerStorageInterface;
 
@@ -34,6 +35,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
                         $table->addColumn('status_code', Type::STRING);
                         $table->addColumn('data', Type::BLOB);
                         $table->addColumn('children', Type::STRING);
+                        $table->addColumn('duration', Type::INTEGER, ['description' => 'Duration in second.', 'default' => 0]);
                         $table->setPrimaryKey(['token']);
                         $table->addIndex(['ip']);
                         $table->addIndex(['method']);
@@ -41,6 +43,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
                         $table->addIndex(['time']);
                         $table->addIndex(['parent']);
                         $table->addIndex(['status_code']);
+                        $table->addIndex(['duration']);
                     }
                 },
             ]
@@ -75,6 +78,9 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
 
     public function write(Profile $profile)
     {
+        /** @var TimeDataCollector $time */
+        $time = $profile->hasCollector('time') ? $profile->getCollector('time') : null;
+
         $fields = [
             'token'       => $profile->getToken(),
             'ip'          => $profile->getIp(),
@@ -83,6 +89,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
             'time'        => $profile->getTime(),
             'parent'      => $profile->getParentToken(),
             'status_code' => $profile->getStatusCode(),
+            'duration'    => $time ? $time->getDuration() : 0,
             'data'        => serialize($profile->getCollectors()),
             'children'    => serialize(
                 array_map(
