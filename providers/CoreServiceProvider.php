@@ -47,6 +47,7 @@ use Symfony\Component\HttpKernel\DataCollector\TimeDataCollector;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Stopwatch\Stopwatch;
+use \Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 
 class CoreServiceProvider implements ServiceProviderInterface
 {
@@ -197,6 +198,10 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new RabbitMqDataCollector;
         };
 
+        $c['stopwatch'] = function () {
+            return new Stopwatch();
+        };
+
         $c['profiler.collectors'] = function () {
             return [
                 'config'    => function ()   { return new ConfigDataCollector('GO1', App::NAME . App::VERSION); },
@@ -204,7 +209,7 @@ class CoreServiceProvider implements ServiceProviderInterface
                 'exception' => function ()   { return new ExceptionDataCollector; },
                 'events'    => function ($c) { return new EventDataCollector($c['dispatcher']); },
                 'logger'    => function ($c) { return new LoggerDataCollector($c['logger']); },
-                'time'      => function ()   { return new TimeDataCollector(null, new Stopwatch); },
+                'time'      => function ($c) { return new TimeDataCollector(null, $c['stopwatch']); },
                 'memory'    => function ()   { return new MemoryDataCollector; },
                 'guzzle'    => function ($c) { return $c['profiler.collectors.guzzle']; },
                 'db'        => function ($c) { return $c['profiler.collectors.db']; },
@@ -234,6 +239,10 @@ class CoreServiceProvider implements ServiceProviderInterface
                 $db->getConfiguration()->setSQLLogger($loggerChain);
                 $collector->addLogger($name, $logger);
             }
+
+            $c->extend('dispatcher', function ($dispatcher, $app) {
+                return new TraceableEventDispatcher($dispatcher, $app['stopwatch'], $app['logger']);
+            });
 
             $c->register(
                 new class implements ServiceProviderInterface, EventListenerProviderInterface
