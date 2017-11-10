@@ -12,7 +12,6 @@ return call_user_func(function () {
 
     return [
         'debug'  => $debug,
-        'dbOptions' => [],
         'routes' => [
             ['GET', '/', function (App $c) {
                 return $c->json(['time' => isset($c['time']) ? $c['time'] : time()]);
