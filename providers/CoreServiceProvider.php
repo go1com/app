@@ -42,7 +42,7 @@ use Symfony\Component\HttpKernel\DataCollector\EventDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\ExceptionDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\LoggerDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector;
-use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector;
+use go1\app\domain\profiler\RequestDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\TimeDataCollector;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
