@@ -16,6 +16,7 @@ use go1\app\domain\profiler\DoctrineDataCollector;
 use go1\app\domain\profiler\ElasticSearchDataCollector;
 use go1\app\domain\profiler\GuzzleDataCollector;
 use go1\app\domain\profiler\GuzzleHistory;
+use go1\app\domain\profiler\Neo4jDataCollector;
 use go1\app\domain\profiler\RabbitMqDataCollector;
 use go1\jwt_middleware\JwtMiddleware;
 use GuzzleHttp\Client;
@@ -198,6 +199,14 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new RabbitMqDataCollector;
         };
 
+        $c['profiler.collectors.neo4j'] = function() {
+            if (!class_exists('GraphAware\Neo4j\Client\ClientBuilder')) {
+                throw new RuntimeException('Missing Neo4j driver.');
+            }
+
+            return new Neo4jDataCollector;
+        };
+
         $c['stopwatch'] = function () {
             return new Stopwatch();
         };
@@ -215,6 +224,7 @@ class CoreServiceProvider implements ServiceProviderInterface
                 'db'        => function ($c) { return $c['profiler.collectors.db']; },
                 'es'        => function ($c) { return $c['profiler.collectors.es']; },
                 'mq'        => function ($c) { return $c['profiler.collectors.mq']; },
+                'neo4j'     => function ($c) { return $c['profiler.collectors.neo4j']; },
             ];
         };
 
