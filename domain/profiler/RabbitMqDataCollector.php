@@ -19,7 +19,13 @@ class RabbitMqDataCollector extends DataCollector implements LoggerInterface
 
     public function getData()
     {
-        return $this->data;
+        $data = $this->data;
+
+        foreach ($data as &$row) {
+            $row['message'] = json_decode($row['message'], true);
+        }
+
+        return $data;
     }
 
     public function log($level, $message, array $context = [])
