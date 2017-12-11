@@ -4,6 +4,9 @@ namespace go1\app\domain;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
+/**
+ * @deprecated Use ActiveResponse instead.
+ */
 class TerminateAwareJsonResponse extends JsonResponse
 {
     private $callbacks = [];

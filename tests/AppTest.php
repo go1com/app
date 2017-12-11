@@ -1,17 +1,15 @@
 <?php
 
-namespace go1\app;
+namespace go1\app\tests;
 
+use go1\app\App;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class AppTest extends TestCase
 {
-    /**
-     * @return App
-     */
-    protected function getApp()
+    protected function getApp(): App
     {
         return require __DIR__ . '/../public/index.php';
     }
