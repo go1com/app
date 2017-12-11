@@ -4,6 +4,7 @@ namespace go1\app;
 
 use Doctrine\DBAL\DBALException;
 use Exception;
+use go1\app\domain\ActiveResponse;
 use go1\app\domain\TerminateAwareJsonResponse;
 use go1\app\providers\CoreServiceProvider;
 use Silex\Application;
@@ -110,7 +111,9 @@ class App extends Application
     {
         parent::terminate($req, $res);
 
-        if ($res instanceof TerminateAwareJsonResponse) {
+        $terminate = $res instanceof ActiveResponse;
+        $terminate |= $res instanceof TerminateAwareJsonResponse;
+        if ($terminate) {
             foreach ($res->terminateCallbacks() as &$callback) {
                 $callback($req, $res);
             }
