@@ -13,8 +13,6 @@ class ActiveResponseTest extends AppTest
 
     protected function setUp()
     {
-        parent::setUp();
-
         $this->shouldBeTrue = false;
     }
 
@@ -67,6 +65,12 @@ class ActiveResponseTest extends AppTest
 
         $req = Request::create('/qa?foo=bar', 'POST');
         $req->headers->set('Accept', 'application/json');
+        $res = $app->handle($req);
+
+        $this->assertEquals('application/json', $res->headers->get('Content-Type'));
+        $this->assertEquals('{"foo":"bar"}', $res->getContent());
+
+        $req = Request::create('/qa?foo=bar', 'POST');
         $res = $app->handle($req);
 
         $this->assertEquals('application/json', $res->headers->get('Content-Type'));

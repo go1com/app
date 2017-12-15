@@ -11,6 +11,7 @@ class ActiveResponse extends Response
     private $terminate   = [];
     private $accepts     = [];
 
+
     public function setContent($content)
     {
         $this->content = $content;
@@ -38,6 +39,10 @@ class ActiveResponse extends Response
 
     public function prepare(Request $req)
     {
+        if (!$this->headers->has('Content-Type')) {
+            $this->headers->set('Content-Type', 'application/json');
+        }
+
         parent::prepare($req);
 
         $this->accepts = $req->headers->get('accept', '');
@@ -82,5 +87,12 @@ class ActiveResponse extends Response
         }
 
         return json_encode($this->content, $this->jsonOptions);
+    }
+
+    public function sendContent()
+    {
+        echo $this->getContent();
+
+        return $this;
     }
 }
