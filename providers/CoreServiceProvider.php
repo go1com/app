@@ -67,13 +67,8 @@ class CoreServiceProvider implements ServiceProviderInterface
         $c->offsetExists('clientOptions') && $this->registerClientService($c);
         $this->registerProfilerServices($c);
 
-        $c['middleware.jwt'] = function () {
-            return new JwtMiddleware;
-        };
-
-        $c['middleware.core'] = function () {
-            return new CoreMiddlewareProvider;
-        };
+        $c['middleware.jwt'] = function () { return new JwtMiddleware; };
+        $c['middleware.core'] = function () { return new CoreMiddlewareProvider; };
     }
 
     private function registerCacheServices(Container $c)
@@ -82,7 +77,6 @@ class CoreServiceProvider implements ServiceProviderInterface
             $backend = $c['cacheOptions']['backend'];
             switch ($backend) {
                 case 'array':
-                case 'memcache':
                 case 'memcached':
                 case 'filesystem':
                 case 'redis':
@@ -103,24 +97,6 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $c['cache.filesystem'] = function (Container $c) {
             return new FilesystemCache($c['cacheOptions']['directory']);
-        };
-
-        $c['cache.memcache'] = function (Container $c) {
-            if (!class_exists('Memcache')) {
-                throw new RuntimeException('Missing caching driver.');
-            }
-
-            $host = $c['cacheOptions']['host'];
-            $port = $c['cacheOptions']['port'];
-            $memcache = new Memcache();
-            if (!$memcache->connect($host, $port)) {
-                throw new RuntimeException('Can not connect to cache backend.');
-            }
-
-            $cache = new MemcacheCache;
-            $cache->setMemcache($memcache);
-
-            return $cache;
         };
 
         $c['cache.memcached'] = function (Container $c) {
