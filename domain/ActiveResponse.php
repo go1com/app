@@ -38,9 +38,6 @@ class ActiveResponse extends Response
 
     public function prepare(Request $req)
     {
-        # throw new \RuntimeException();
-        # dump(__METHOD__);
-
         parent::prepare($req);
 
         $this->accepts = $req->headers->get('accept', '');
@@ -55,7 +52,7 @@ class ActiveResponse extends Response
 
                         return $this;
                     }
-                # No break;
+                    # No break;
 
                 case 'application/json':
                     $this->headers->set('Content-Type', $accept);
