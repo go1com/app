@@ -11,7 +11,6 @@ class ActiveResponse extends Response
     private $terminate   = [];
     private $accepts     = [];
 
-
     public function setContent($content)
     {
         $this->content = $content;
@@ -39,9 +38,8 @@ class ActiveResponse extends Response
 
     public function prepare(Request $req)
     {
-        if (!$this->headers->has('Content-Type')) {
-            $this->headers->set('Content-Type', 'application/json');
-        }
+        # throw new \RuntimeException();
+        # dump(__METHOD__);
 
         parent::prepare($req);
 
@@ -51,47 +49,21 @@ class ActiveResponse extends Response
             $accept = trim($accept);
             switch ($accept) {
                 case 'application/x-msgpack':
-                    if (!function_exists('msgpack_pack')) {
-                        continue;
-                    }
+                    if (function_exists('msgpack_pack')) {
+                        $this->headers->set('Content-Type', $accept);
+                        $this->content = msgpack_pack($this->content);
 
-                    # No break;
+                        return $this;
+                    }
+                # No break;
 
                 case 'application/json':
                     $this->headers->set('Content-Type', $accept);
+                    $this->content = json_encode($this->content, $this->jsonOptions);
 
                     return $this;
             }
         }
-
-        return $this;
-    }
-
-    public function getContent()
-    {
-        if (is_string($this->content)) {
-            return $this->content;
-        }
-
-        foreach ($this->accepts as &$accept) {
-            switch (trim($accept)) {
-                case 'application/x-msgpack':
-                    if (function_exists('msgpack_pack')) {
-                        return msgpack_pack($this->content);
-                    }
-                    break;
-
-                case 'application/json':
-                    return json_encode($this->content, $this->jsonOptions);
-            }
-        }
-
-        return json_encode($this->content, $this->jsonOptions);
-    }
-
-    public function sendContent()
-    {
-        echo $this->getContent();
 
         return $this;
     }

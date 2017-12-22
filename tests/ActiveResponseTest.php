@@ -69,20 +69,12 @@ class ActiveResponseTest extends AppTest
 
         $this->assertEquals('application/json', $res->headers->get('Content-Type'));
         $this->assertEquals('{"foo":"bar"}', $res->getContent());
-
-        $req = Request::create('/qa?foo=bar', 'POST');
-        $res = $app->handle($req);
-
-        $this->assertEquals('application/json', $res->headers->get('Content-Type'));
-        $this->assertEquals('{"foo":"bar"}', $res->getContent());
     }
 
     public function testMessagePackResponseFormat()
     {
         $app = $this->getApp();
-        $app->post('/qa', function () {
-            return new ActiveResponse(['foo' => 'bar'], 444);
-        });
+        $app->post('/qa', function () { return new ActiveResponse(['foo' => 'bar'], 444); });
 
         $req = Request::create('/qa?foo=bar', 'POST');
         $req->headers->set('Accept', 'application/x-msgpack, application/json');
