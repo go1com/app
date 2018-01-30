@@ -10,7 +10,7 @@
   },
   "require": {
     "doctrine/dbal": "^2.5",
-    "go1/jwt-middleware": "dev-master",
+    "go1/jwt-middleware": "^0.3",
     "silex/silex": "^2.0.0",
     "symfony/stopwatch": "^3.2"
   },
