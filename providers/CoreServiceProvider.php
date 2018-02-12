@@ -7,6 +7,7 @@ use Doctrine\Common\Cache\FilesystemCache;
 use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\Cache\RedisCache;
+use Predis\Client as PredisClient;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Logging\LoggerChain;
@@ -131,6 +132,17 @@ class CoreServiceProvider implements ServiceProviderInterface
             $cache->setRedis($redis);
 
             return $cache;
+        };
+
+        $c['cache.predis'] = function (Container $c) {
+            if (!class_exists(PredisClient::class)) {
+                throw new RuntimeException('Missing caching driver.');
+            }
+
+            $host = $c['cacheOptions']['host'];
+            $port = $c['cacheOptions']['port'];
+
+            return new PredisClient("$host:$port");
         };
     }
 
