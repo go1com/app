@@ -5,6 +5,9 @@ namespace go1\app\domain;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @deprecated This approach does not provide performance improvement.
+ */
 class ActiveResponse extends Response
 {
     private $jsonOptions = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
