@@ -276,7 +276,9 @@ class CoreServiceProvider implements ServiceProviderInterface
         };
 
         $c['client'] = function (Container $c) {
-            $options = $c['clientOptions'];
+            /** @var App $c */
+            $options = $c['clientOptions'] + ['User-Agent' => 'GO1 ' . $c::NAME . '/' . $c::VERSION];
+
             $stack = HandlerStack::create(new CurlHandler);
             $stack->push($c['client.middleware.map-request']);
             $options['handler'] = $stack;
