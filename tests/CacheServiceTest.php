@@ -38,13 +38,12 @@ class CacheServiceTest extends TestCase
     public function testPredisClient()
     {
         try {
-            $app = new App([
-                'cacheOptions' => ['backend' => 'custom'],
-            ]);
+            $app = new App(['cacheOptions' => ['backend' => 'custom']]);
             $app['cache.predis'];
             $this->assertTrue(false);
-        } catch (RuntimeException $ex) {
-            $this->assertContains("Missing caching driver.", $ex->getMessage());
+        }
+        catch (RuntimeException $e) {
+            $this->assertContains("Missing caching driver.", $e->getMessage());
         }
     }
 }
