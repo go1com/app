@@ -4,10 +4,8 @@ namespace go1\app\providers;
 
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\FilesystemCache;
-use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\Cache\RedisCache;
-use Predis\Client as PredisClient;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Logging\LoggerChain;
@@ -24,15 +22,16 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
-use Memcache;
 use Memcached;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Predis\Client as PredisClient;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
 use Redis;
 use RuntimeException;
 use Silex\Api\EventListenerProviderInterface;
@@ -46,10 +45,10 @@ use Symfony\Component\HttpKernel\DataCollector\LoggerDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\RequestDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\TimeDataCollector;
+use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Stopwatch\Stopwatch;
-use \Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 
 class CoreServiceProvider implements ServiceProviderInterface
 {
@@ -64,7 +63,7 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         // Custom services
         $c->offsetExists('cacheOptions') && $this->registerCacheServices($c);
-        $c->offsetExists('logOptions') && $this->registerLogServices($c);
+        $this->registerLogServices($c);
         $c->offsetExists('clientOptions') && $this->registerClientService($c);
         $this->registerProfilerServices($c);
 
@@ -149,6 +148,10 @@ class CoreServiceProvider implements ServiceProviderInterface
     private function registerLogServices(Container $c)
     {
         $c['logger'] = function (Container $c) {
+            if (!$c->offsetExists('logOptions')) {
+                return new NullLogger();
+            }
+
             $logger = new Logger(isset($c['logOptions']['name']) ? $c['logOptions']['name'] : 'go1');
 
             return $logger->pushHandler($c['logger.php_error']);
