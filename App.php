@@ -7,6 +7,7 @@ use Exception;
 use go1\app\domain\ActiveResponse;
 use go1\app\domain\TerminateAwareJsonResponse;
 use go1\app\providers\CoreServiceProvider;
+use Psr\Log\LoggerInterface;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -91,12 +92,16 @@ class App extends Application
 
     public function onError(Exception $e)
     {
+        /** @var LoggerInterface $logger */
+        $logger = $this['logger'];
+
         if ($this['debug']) {
             throw $e;
         }
+        
+        $logger->error($e->getMessage());
 
         if ($e instanceof DBALException) {
-            $this['logger'] && $this['logger']->error($e->getMessage());
             $message = $this['debug'] ? $e->getMessage() : 'Database error #' . $e->getCode();
 
             return new JsonResponse(['message' => $message], 500);
