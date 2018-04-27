@@ -30,6 +30,11 @@ class GuzzleDataCollector extends DataCollector
         return $this->data;
     }
 
+    public function reset()
+    {
+        $this->data = [];
+    }
+
     /**
      * {@inheritdoc}
      */

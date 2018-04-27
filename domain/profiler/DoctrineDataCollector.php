@@ -30,6 +30,11 @@ class DoctrineDataCollector extends DataCollector
         $this->dbs = $dbs;
     }
 
+    public function reset()
+    {
+        $this->loggers = [];
+    }
+
     public function addLogger(string $name, DebugStack $logger)
     {
         $this->loggers[$name] = $logger;

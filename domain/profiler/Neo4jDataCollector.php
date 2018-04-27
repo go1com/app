@@ -14,17 +14,22 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 
 /**
  * @author Xavier Coureau <xavier@pandawan-technology.com>
- * @see https://github.com/neo4j-contrib/neo4j-symfony/blob/master/Collector/Neo4jDataCollector.php
+ * @see    https://github.com/neo4j-contrib/neo4j-symfony/blob/master/Collector/Neo4jDataCollector.php
  */
 class Neo4jDataCollector extends DataCollector
 {
-    private $nbQueries = 0;
-    private $statements = [];
+    private $nbQueries      = 0;
+    private $statements     = [];
     private $statementsHash = [];
 
     public function getName()
     {
         return 'neo4j';
+    }
+
+    public function reset()
+    {
+        $this->data = [];
     }
 
     public function collect(Request $request, Response $response, \Exception $exception = null)
@@ -85,11 +90,11 @@ class Neo4jDataCollector extends DataCollector
             $idx = $this->nbQueries++;
             $this->statements[$idx] = [
                 'start_time' => microtime(true) * 1000,
-                'end_time' => microtime(true) * 1000, // same
+                'end_time'   => microtime(true) * 1000, // same
                 'nb_results' => 0,
-                'query' => $statementText,
+                'query'      => $statementText,
                 'parameters' => $statementParams,
-                'tag' => $statement->getTag(),
+                'tag'        => $statement->getTag(),
                 'statistics' => [],
             ];
             $this->statementsHash[$statementText][$statementParams][$tag] = $idx;
@@ -114,7 +119,8 @@ class Neo4jDataCollector extends DataCollector
                 $idx = $this->nbQueries++;
                 $this->statements[$idx]['start_time'] = null;
                 $this->statementsHash[$idx] = $idx;
-            } else {
+            }
+            else {
                 $idx = $this->statementsHash[$statementText][$encodedParameters][$tag];
             }
 
@@ -148,10 +154,10 @@ class Neo4jDataCollector extends DataCollector
         $exception = $event->getException();
         $idx = $this->nbQueries - 1;
         $this->statements[$idx] = array_merge($this->statements[$idx], [
-            'end_time' => microtime(true) * 1000,
-            'exceptionCode' => method_exists($exception, 'classification') ? $exception->classification() : '',
+            'end_time'         => microtime(true) * 1000,
+            'exceptionCode'    => method_exists($exception, 'classification') ? $exception->classification() : '',
             'exceptionMessage' => method_exists($exception, 'getMessage') ? $exception->getMessage() : '',
-            'success' => false,
+            'success'          => false,
         ]);
     }
 }

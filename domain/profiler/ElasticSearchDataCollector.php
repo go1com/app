@@ -19,6 +19,11 @@ class ElasticSearchDataCollector extends DataCollector implements LoggerInterfac
         return 'es';
     }
 
+    public function reset()
+    {
+        $this->data = [];
+    }
+
     public function getData()
     {
         if (isset($this->data['info'])) {

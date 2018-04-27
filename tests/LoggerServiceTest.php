@@ -46,7 +46,7 @@ class LoggerServiceTest extends TestCase
     public function testNull()
     {
         $app = new App();
-        $this->assertNull($app['logger']);
+        $this->assertTrue($app['logger'] instanceof NullLogger);
     }
 
     public function testDBALExceptionLog()
