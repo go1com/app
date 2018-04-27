@@ -9,6 +9,8 @@ use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 
 class LoggerServiceTest extends TestCase
@@ -74,5 +76,30 @@ class LoggerServiceTest extends TestCase
         };
 
         $app->handle(Request::create('/'));
+    }
+
+    public function testErrorIsLogged()
+    {
+        $app = new App(['logOptions' => ['name' => 'qa']]);
+
+        $app->extend('logger', function () use (&$logger) {
+            return $logger = new class extends NullLogger
+            {
+                public $log = [];
+
+                public function log($level, $message, array $context = [])
+                {
+                    $this->log[$level][] = $message;
+                }
+
+            };
+        });
+
+        $app->get('/testErrorIsLogged', function () {
+            throw new RuntimeException('Something went wrong.');
+        });
+
+        $app->handle(Request::create('/testErrorIsLogged'));
+        $this->assertContains('Something went wrong.', $logger->log['error'][0]);
     }
 }

@@ -98,7 +98,7 @@ class App extends Application
         if ($this['debug']) {
             throw $e;
         }
-        
+
         $logger->error($e->getMessage());
 
         if ($e instanceof DBALException) {
