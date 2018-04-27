@@ -2,6 +2,7 @@
 
 namespace go1\app\domain\profiler;
 
+use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,8 +36,13 @@ class RabbitMqDataCollector extends DataCollector implements LoggerInterface
         }
     }
 
-    public function collect(Request $request, Response $response, \Exception $exception = null)
+    public function collect(Request $request, Response $response, Exception $exception = null)
     {
         return $this->data;
+    }
+
+    public function reset()
+    {
+        $this->data = [];
     }
 }
