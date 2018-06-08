@@ -20,20 +20,32 @@ class App extends Application
 
     private $timerStart;
 
-    public function __construct(array $values = [])
+    /**
+     * App constructor.
+     *
+     * @param string|array $values
+     *   string Path to configuration file.
+     *   array  Configuration values for the application.
+     */
+    public function __construct($values = [])
     {
+        // Remove _DOCKER_  prefix from env variables.
+        foreach ($_ENV as $k => &$v) {
+            if (0 === strpos($k, '_DOCKER_')) {
+                putenv(substr($k, 8) . '=' . $v);
+                $_ENV[substr($k, 8)] = $v;
+            }
+        }
+
+        if (is_string($values)) {
+            $values = require $values;
+        }
+
         // Set default timezone.
         date_default_timezone_set(isset($values['timezone']) ? $values['timezone'] : 'UTC');
 
         // Helper variable to track spent time.
         $this->timerStart = microtime();
-
-        // Remove _DOCKER_  prefix from env variables.
-        foreach ($_ENV as $k => &$v) {
-            if (0 === strpos($k, '_DOCKER_')) {
-                putenv(substr($k, 8) . '=' . $v);
-            }
-        }
 
         // Make sure errors are hidden if debug is off.
         $debug = isset($values['debug']) ? $values['debug'] : false;
