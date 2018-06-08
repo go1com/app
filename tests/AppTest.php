@@ -29,4 +29,11 @@ class AppTest extends TestCase
         $this->assertTrue($res instanceof JsonResponse);
         $this->assertTrue($time >= $app['time']);
     }
+
+    public function testConfigPathApp()
+    {
+        $_ENV['_DOCKER_FOO'] = 'bar';
+        $app = new App(__DIR__ . '/fixtures/demo-app.config.php');
+        $this->assertEquals('bar', $app['foo']);
+    }
 }
