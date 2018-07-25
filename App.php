@@ -54,6 +54,10 @@ class App extends Application
         error_reporting($debug ? E_ALL : 0);
         ini_set('display_errors', $debug);
 
+        if ($debug) { //No need to install it with display errors disabled
+            $this->installErrorHandler();
+        }
+
         if (isset($values['dbOptions'])) {
             if (isset($values['dbOptions']['driver'])) {
                 $this['db.options'] = $values['dbOptions'];
@@ -102,12 +106,36 @@ class App extends Application
         return microtime() - $this->timerStart;
     }
 
+    /**
+     * New PHP7 Error subclasses are not caught by Silex. This is a problem in debug mode,
+     * because PHP sends back a HTTP Status Code 200 if display_errors is enabled.
+     *
+     * This sets a 500 status code
+     */
+    protected function installErrorHandler()
+    {
+        set_exception_handler(function(\Throwable $e) {
+            try {
+                http_response_code(500);
+                echo $e;
+                if ($this->offsetExists('logger')) {
+                    /** @var LoggerInterface $logger */
+                    $logger = $this['logger'];
+                    $logger->error($e->getMessage());
+                }
+            } finally {
+                exit(1);
+            }
+        });
+    }
+
     public function onError(Exception $e)
     {
         /** @var LoggerInterface $logger */
         $logger = $this['logger'];
 
         if ($this['debug']) {
+            http_response_code(500);
             throw $e;
         }
 
