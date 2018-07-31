@@ -36,4 +36,12 @@ class AppTest extends TestCase
         $app = new App(__DIR__ . '/fixtures/demo-app.config.php');
         $this->assertEquals('bar', $app['foo']);
     }
+
+    public function testConfigPathDuplicateApp()
+    {
+        $_ENV['_DOCKER_BAR'] = 'bar';
+        $_ENV['BAR'] = 'bar1';
+        $app = new App(__DIR__ . '/fixtures/demo-app.config.php');
+        $this->assertEquals('bar1', $app['bar']);
+    }
 }

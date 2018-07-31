@@ -31,7 +31,7 @@ class App extends Application
     {
         // Remove _DOCKER_  prefix from env variables.
         foreach ($_ENV as $k => &$v) {
-            if (0 === strpos($k, '_DOCKER_')) {
+            if (0 === strpos($k, '_DOCKER_') && !isset($_ENV[substr($k, 8)])) {
                 putenv(substr($k, 8) . '=' . $v);
                 $_ENV[substr($k, 8)] = $v;
             }
