@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class App extends Application
 {
@@ -133,6 +134,10 @@ class App extends Application
     {
         /** @var LoggerInterface $logger */
         $logger = $this['logger'];
+
+        if ($e instanceof MethodNotAllowedHttpException) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_METHOD_NOT_ALLOWED);
+        }
 
         if ($this['debug']) {
             http_response_code(500);
