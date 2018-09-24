@@ -135,16 +135,16 @@ class App extends Application
         /** @var LoggerInterface $logger */
         $logger = $this['logger'];
 
-        if ($e instanceof MethodNotAllowedHttpException) {
-            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_METHOD_NOT_ALLOWED);
-        }
-
         if ($this['debug']) {
             http_response_code(500);
             throw $e;
         }
 
         $logger->error($e->getMessage());
+
+        if ($e instanceof MethodNotAllowedHttpException) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_METHOD_NOT_ALLOWED);
+        }
 
         if ($e instanceof DBALException) {
             $message = $this['debug'] ? $e->getMessage() : 'Database error #' . $e->getCode();
