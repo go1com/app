@@ -12,9 +12,10 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Throwable;
 
 class App extends Application
 {
@@ -63,8 +64,7 @@ class App extends Application
         if (isset($values['dbOptions'])) {
             if (isset($values['dbOptions']['driver'])) {
                 $this['db.options'] = $values['dbOptions'];
-            }
-            else {
+            } else {
                 $this['dbs.options'] = $values['dbOptions'];
             }
 
@@ -116,7 +116,7 @@ class App extends Application
      */
     protected function installErrorHandler()
     {
-        set_exception_handler(function(\Throwable $e) {
+        set_exception_handler(function (Throwable $e) {
             try {
                 http_response_code(500);
                 echo $e;
@@ -137,12 +137,8 @@ class App extends Application
         $logger = $this['logger'];
 
         if ($this['debug']) {
-            if($e instanceof HttpException) {
-                http_response_code($e->getStatusCode());
-                echo $e;
-                return false;
-            }
-            http_response_code(500);
+            $code = ($e instanceof HttpExceptionInterface) ? $e->getStatusCode() : 500;
+            http_response_code($code);
             throw $e;
         }
 
