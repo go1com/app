@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class App extends Application
 {
@@ -136,8 +137,14 @@ class App extends Application
         $logger = $this['logger'];
 
         if ($this['debug']) {
-            http_response_code(500);
-            throw $e;
+            if($e instanceof HttpException) {
+                http_response_code($e->getStatusCode());
+                echo $e;
+                return false;
+            } else {
+                http_response_code(500);
+                throw $e;
+            }
         }
 
         $logger->error($e->getMessage());
