@@ -10,5 +10,8 @@ return [
         ['GET', '/exception', function () {
             throw new \Exception('oopsie');
         }],
+        ['POST', '/not-allowed-method', function () {
+
+        }],
     ],
 ];
