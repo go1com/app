@@ -56,11 +56,4 @@ class ConfigDebugOptionTest extends TestCase
         $this->assertEquals('HTTP/1.0 405 Method Not Allowed', $http_response_header[0]);
     }
 
-    public function testItReturns404DebugOnNotDefinedRoute()
-    {
-        $fd = @fopen('http://127.0.0.1:4455/not-defined-route', 'r');
-        $this->assertFalse($fd, 'Request was expected to fail');
-        $this->assertEquals('HTTP/1.0 404 Not Found', $http_response_header[0]);
-    }
-
 }
