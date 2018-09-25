@@ -118,7 +118,8 @@ class App extends Application
     {
         set_exception_handler(function (Throwable $e) {
             try {
-                http_response_code(500);
+                $code = ($e instanceof HttpExceptionInterface) ? $e->getStatusCode() : 500;
+                http_response_code($code);
                 echo $e;
                 if ($this->offsetExists('logger')) {
                     /** @var LoggerInterface $logger */
@@ -137,8 +138,6 @@ class App extends Application
         $logger = $this['logger'];
 
         if ($this['debug']) {
-            $code = ($e instanceof HttpExceptionInterface) ? $e->getStatusCode() : 500;
-            http_response_code($code);
             throw $e;
         }
 
