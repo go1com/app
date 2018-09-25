@@ -141,10 +141,9 @@ class App extends Application
                 http_response_code($e->getStatusCode());
                 echo $e;
                 return false;
-            } else {
-                http_response_code(500);
-                throw $e;
             }
+            http_response_code(500);
+            throw $e;
         }
 
         $logger->error($e->getMessage());
