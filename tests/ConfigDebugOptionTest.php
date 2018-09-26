@@ -3,6 +3,8 @@
 namespace go1\app\tests;
 
 use PHPUnit\Framework\TestCase;
+use go1\app\App;
+use Symfony\Component\HttpFoundation\Request;
 
 class ConfigDebugOptionTest extends TestCase
 {
@@ -48,4 +50,16 @@ class ConfigDebugOptionTest extends TestCase
         $this->assertFalse($fd, 'Request was expected to fail');
         $this->assertEquals('HTTP/1.0 500 Internal Server Error', $http_response_header[0]);
     }
+
+    public function testItReturns405DebugOnMethodNotAllowed()
+    {
+        $app = new App();
+        $app->post('/not-allowed-method', function () {
+        });
+
+        $req = Request::create('/not-allowed-method', 'GET');
+        $res = $app->handle($req);
+        $this->assertEquals(405, $res->getStatusCode());
+    }
+
 }

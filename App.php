@@ -12,7 +12,10 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Throwable;
 
 class App extends Application
 {
@@ -61,8 +64,7 @@ class App extends Application
         if (isset($values['dbOptions'])) {
             if (isset($values['dbOptions']['driver'])) {
                 $this['db.options'] = $values['dbOptions'];
-            }
-            else {
+            } else {
                 $this['dbs.options'] = $values['dbOptions'];
             }
 
@@ -114,9 +116,10 @@ class App extends Application
      */
     protected function installErrorHandler()
     {
-        set_exception_handler(function(\Throwable $e) {
+        set_exception_handler(function (Throwable $e) {
             try {
-                http_response_code(500);
+                $code = ($e instanceof HttpExceptionInterface) ? $e->getStatusCode() : 500;
+                http_response_code($code);
                 echo $e;
                 if ($this->offsetExists('logger')) {
                     /** @var LoggerInterface $logger */
@@ -135,11 +138,14 @@ class App extends Application
         $logger = $this['logger'];
 
         if ($this['debug']) {
-            http_response_code(500);
             throw $e;
         }
 
         $logger->error($e->getMessage());
+
+        if ($e instanceof MethodNotAllowedHttpException) {
+            return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_METHOD_NOT_ALLOWED);
+        }
 
         if ($e instanceof DBALException) {
             $message = $this['debug'] ? $e->getMessage() : 'Database error #' . $e->getCode();
