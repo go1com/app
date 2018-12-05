@@ -17,9 +17,6 @@ use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Throwable;
 
-/**
- * @deprecated Use \go1\app\DomainService
- */
 class App extends Application
 {
     const NAME = 'go1';
