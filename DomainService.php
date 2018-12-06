@@ -3,13 +3,12 @@
 namespace go1\app;
 
 use go1\app\App as GO1;
-use go1\util\Service;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class DomainService extends GO1
 {
     const NAME    = SERVICE_NAME;
-    const VERSION = Service::VERSION;
+    const VERSION = SERVICE_VERSION;
 
     public function __construct($values = [])
     {

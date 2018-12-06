@@ -7,6 +7,7 @@ return call_user_func(function () {
 
     if (!defined('SERVICE_NAME')) {
         define('SERVICE_NAME', 'example');
+        define('SERVICE_VERSION', '1.0.0');
     }
 
     if ($debug = getenv('APP_DEBUG') ?: true) {
