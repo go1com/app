@@ -6,6 +6,7 @@ use Doctrine\Common\Cache\CacheProvider;
 use go1\app\App;
 use go1\app\tests\mocks\CustomCacheBackend;
 use PHPUnit\Framework\TestCase;
+use Predis\Client as PredisClient;
 use RuntimeException;
 
 class CacheServiceTest extends TestCase
@@ -37,13 +38,21 @@ class CacheServiceTest extends TestCase
 
     public function testPredisClient()
     {
-        try {
-            $app = new App(['cacheOptions' => ['backend' => 'custom']]);
-            $app['cache.predis'];
-            $this->assertTrue(false);
-        }
-        catch (RuntimeException $e) {
-            $this->assertContains("Missing caching driver.", $e->getMessage());
+        $app = new App([
+            'cacheOptions' => [
+                'backend' => 'custom',
+                'host'    => 'localhost',
+                'port'    => '9200',
+            ],
+        ]);
+
+        $cache = $app['cache.predis'];
+
+        if (class_exists(PredisClient::class)) {
+            $this->assertTrue($cache instanceof PredisClient);
+        } else {
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('Missing caching driver.');
         }
     }
 }

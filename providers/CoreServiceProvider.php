@@ -140,7 +140,7 @@ class CoreServiceProvider implements ServiceProviderInterface
 
             $host = $c['cacheOptions']['host'];
             $port = $c['cacheOptions']['port'];
-
+            
             return new PredisClient("$host:$port");
         };
     }
@@ -182,15 +182,15 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new DoctrineDataCollector($connections);
         };
 
-        $c['profiler.collectors.es'] = function() {
+        $c['profiler.collectors.es'] = function () {
             return new ElasticSearchDataCollector;
         };
 
-        $c['profiler.collectors.mq'] = function() {
+        $c['profiler.collectors.mq'] = function () {
             return new RabbitMqDataCollector;
         };
 
-        $c['profiler.collectors.neo4j'] = function() {
+        $c['profiler.collectors.neo4j'] = function () {
             if (!class_exists('GraphAware\Neo4j\Client\ClientBuilder')) {
                 throw new RuntimeException('Missing Neo4j driver.');
             }
@@ -204,13 +204,13 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $c['profiler.collectors'] = function () {
             return [
-                'config'    => function ()   { return new ConfigDataCollector('GO1', App::NAME . App::VERSION); },
-                'request'   => function ()   { return new RequestDataCollector;   },
-                'exception' => function ()   { return new ExceptionDataCollector; },
+                'config'    => function () { return new ConfigDataCollector('GO1', App::NAME . App::VERSION); },
+                'request'   => function () { return new RequestDataCollector; },
+                'exception' => function () { return new ExceptionDataCollector; },
                 'events'    => function ($c) { return new EventDataCollector($c['dispatcher']); },
                 'logger'    => function ($c) { return new LoggerDataCollector($c['logger']); },
                 'time'      => function ($c) { return new TimeDataCollector(null, $c['stopwatch']); },
-                'memory'    => function ()   { return new MemoryDataCollector; },
+                'memory'    => function () { return new MemoryDataCollector; },
                 'guzzle'    => function ($c) { return $c['profiler.collectors.guzzle']; },
                 'db'        => function ($c) { return $c['profiler.collectors.db']; },
                 'es'        => function ($c) { return $c['profiler.collectors.es']; },
