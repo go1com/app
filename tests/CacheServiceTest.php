@@ -46,13 +46,13 @@ class CacheServiceTest extends TestCase
             ],
         ]);
 
-        $cache = $app['cache.predis'];
-
         if (class_exists(PredisClient::class)) {
+            $cache = $app['cache.predis'];
             $this->assertTrue($cache instanceof PredisClient);
         } else {
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Missing caching driver.');
+            $app['cache.predis'];
         }
     }
 }
