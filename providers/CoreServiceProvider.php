@@ -288,6 +288,9 @@ class CoreServiceProvider implements ServiceProviderInterface
             foreach ($_SERVER as $name => $value) {
                 if (substr($name, 0, 7) == 'HTTP_X_') {
                     $stack->push(Middleware::mapRequest(function (RequestInterface $request) use ($name, $value) {
+                        // Add header to request, follow by section Fielding of RFC 2616
+                        // Example from `$_SERVER['HTTP_X_REQUEST_ID']` we will have the header name `X-Request-Id`
+                        // @see: http://php.net/manual/en/function.getallheaders.php#84262
                         return $request->withHeader(str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5))))), $value);
                     }));
                 }
