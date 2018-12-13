@@ -283,7 +283,17 @@ class CoreServiceProvider implements ServiceProviderInterface
             $options = $c['clientOptions'] + ['User-Agent' => 'GO1 ' . $c::NAME . '/' . $c::VERSION];
 
             $stack = HandlerStack::create(new CurlHandler);
-            $stack->push($c['client.middleware.map-request']);
+//            $stack->push($c['client.middleware.map-request']);
+            // Add user-defined header, mentioned in a.o. section 5 of RFC 2047. (https://tools.ietf.org/html/rfc2047#section-5)
+            foreach ($_SERVER as $name => $value)
+            {
+                if (substr($name, 0, 7) == 'HTTP_X_')
+                {
+                    $stack->push(Middleware::mapRequest(function (RequestInterface $request) use ($name, $value) {
+                        return $request->withHeader(str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5))))), $value);
+                    }));
+                }
+            }
             $options['handler'] = $stack;
 
             if ($c->offsetExists('profiler.do') && $c->offsetGet('profiler.do')) {
