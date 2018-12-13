@@ -3,6 +3,7 @@
 namespace go1\app;
 
 use go1\app\App as GO1;
+use Pimple\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class DomainService extends GO1
@@ -18,7 +19,9 @@ class DomainService extends GO1
 
         // register configured service providers
         foreach ($serviceProviders as $serviceProvider) {
-            $this->register($serviceProvider);
+            $serviceProvider instanceOf ServiceProviderInterface
+                ? $this->register($serviceProvider)
+                : $this->register($serviceProvider[0], $serviceProvider[1]);
         }
 
         // default endpoint
