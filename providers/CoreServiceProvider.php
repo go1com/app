@@ -264,15 +264,6 @@ class CoreServiceProvider implements ServiceProviderInterface
 
     private function registerClientService(Container $c)
     {
-        $c['client.middleware.map-request'] = function () {
-            return Middleware::mapRequest(function (RequestInterface $req) {
-                if (isset($_SERVER['HTTP_X_REQUEST_ID'])) {
-                    return $req->withHeader('X-Request-ID', $_SERVER['HTTP_X_REQUEST_ID']);
-                }
-
-                return $req->withHeader('X-Request-ID', 'N/A');
-            });
-        };
 
         $c['client.middleware.profiler'] = function () {
             return new GuzzleHistory(new Stopwatch);
@@ -283,7 +274,17 @@ class CoreServiceProvider implements ServiceProviderInterface
             $options = $c['clientOptions'] + ['User-Agent' => 'GO1 ' . $c::NAME . '/' . $c::VERSION];
 
             $stack = HandlerStack::create(new CurlHandler);
-            $stack->push($c['client.middleware.map-request']);
+            // Add user-defined header, mentioned in a.o. section 5 of RFC 2047. (https://tools.ietf.org/html/rfc2047#section-5)
+            foreach ($_SERVER as $name => $value) {
+                if (substr($name, 0, 7) == 'HTTP_X_') {
+                    $stack->push(Middleware::mapRequest(function (RequestInterface $request) use ($name, $value) {
+                        // Add header to request, follow by section Fielding of RFC 2616
+                        // Example from `$_SERVER['HTTP_X_REQUEST_ID']` we will have the header name `X-Request-Id`
+                        // @see: http://php.net/manual/en/function.getallheaders.php#84262
+                        return $request->withHeader(str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5))))), $value);
+                    }));
+                }
+            }
             $options['handler'] = $stack;
 
             if ($c->offsetExists('profiler.do') && $c->offsetGet('profiler.do')) {
