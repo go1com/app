@@ -48,7 +48,6 @@ class ClientServiceTest extends TestCase
         ]);
 
         $stack = new HandlerStack($h);
-//        $stack->push($app['client.middleware.map-request']);
         foreach ($_SERVER as $name => $value) {
             if (substr($name, 0, 7) == 'HTTP_X_') {
                 $stack->push(Middleware::mapRequest(function (RequestInterface $request) use ($name, $value) {
