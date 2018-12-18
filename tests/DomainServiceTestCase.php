@@ -5,6 +5,8 @@ namespace go1\app\tests;
 use Doctrine\DBAL\DriverManager;
 use go1\app\DomainService;
 use go1\util\schema\InstallTrait;
+use go1\util\schema\UserSchema;
+use go1\util\Service;
 use go1\util\tests\QueueMockTrait;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -13,7 +15,7 @@ abstract class DomainServiceTestCase extends TestCase
 {
     use InstallTrait;
     use QueueMockTrait;
-    
+
     protected $sqlite;
 
     protected function getApp(): DomainService
@@ -36,6 +38,7 @@ abstract class DomainServiceTestCase extends TestCase
     protected function appInstall(DomainService $app)
     {
         $this->installGo1Schema($app['dbs']['go1'], $coreOnly = false);
+        UserSchema::createViews($app['dbs']['go1'], Service::accountsName('qa'));
     }
 
     protected function getDatabases()
