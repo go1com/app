@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Throwable;
 
@@ -22,6 +23,7 @@ class App extends Application
     const NAME = 'go1';
 
     private $timerStart;
+    private $hasError = false;
 
     /**
      * App constructor.
@@ -134,6 +136,8 @@ class App extends Application
 
     public function onError(Exception $e)
     {
+        $this->hasError = true;
+        
         /** @var LoggerInterface $logger */
         $logger = $this['logger'];
 
@@ -156,6 +160,19 @@ class App extends Application
         if ($e instanceof MethodNotAllowedException) {
             return new JsonResponse(['message' => $e->getMessage()], 404);
         }
+    }
+
+    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
+    {
+        $response = parent::handle($request, $type, $catch);
+
+        if (Response::HTTP_OK == $response->getStatusCode()) {
+            if ($this->hasError) {
+                $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        return $response;
     }
 
     public function terminate(Request $req, Response $res)
