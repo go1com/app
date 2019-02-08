@@ -17,6 +17,7 @@ abstract class DomainServiceTestCase extends TestCase
     use QueueMockTrait;
 
     protected $sqlite;
+    protected $mockMqClient = true;
 
     protected function getApp(): DomainService
     {
@@ -29,7 +30,8 @@ abstract class DomainServiceTestCase extends TestCase
 
         // mocking
         $app['dbs'] = $app->extend('dbs', function () { return $this->getDatabases(); });
-        $this->mockMqClient($app);
+
+        $this->mockMqClient && $this->mockMqClient($app);
         $this->appInstall($app);
 
         return $app;
