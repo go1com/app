@@ -29,8 +29,10 @@ abstract class DomainServiceTestCase extends TestCase
         $app = require __DIR__ . '/../public/index.php';
 
         // mocking
-        $app['dbs'] = $app->extend('dbs', function () { return $this->getDatabases(); });
-
+        if ($app->offsetExists('dbs')) {
+            $app->extend('dbs', function () { return $this->getDatabases(); });
+        }
+        
         $this->mockMqClient && $this->mockMqClient($app);
         $this->appInstall($app);
 
