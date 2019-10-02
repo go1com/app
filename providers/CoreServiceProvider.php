@@ -190,14 +190,6 @@ class CoreServiceProvider implements ServiceProviderInterface
             return new RabbitMqDataCollector;
         };
 
-        $c['profiler.collectors.neo4j'] = function () {
-            if (!class_exists('GraphAware\Neo4j\Client\ClientBuilder')) {
-                throw new RuntimeException('Missing Neo4j driver.');
-            }
-
-            return new Neo4jDataCollector;
-        };
-
         $c['stopwatch'] = function () {
             return new Stopwatch();
         };
@@ -215,7 +207,6 @@ class CoreServiceProvider implements ServiceProviderInterface
                 'db'        => function ($c) { return $c['profiler.collectors.db']; },
                 'es'        => function ($c) { return $c['profiler.collectors.es']; },
                 'mq'        => function ($c) { return $c['profiler.collectors.mq']; },
-                'neo4j'     => function ($c) { return $c['profiler.collectors.neo4j']; },
             ];
         };
 
