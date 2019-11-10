@@ -12,7 +12,8 @@
     "doctrine/dbal":      "^v2.8.0",
     "go1/jwt-middleware": "^0.4",
     "silex/silex":        "^v2.3.0",
-    "symfony/stopwatch":  "^3.2"
+    "symfony/stopwatch":  "^3.2",
+    "symfony/service-contracts": "^2.0"
   },
   "require-dev": {
     "guzzlehttp/guzzle": "^6.2",
