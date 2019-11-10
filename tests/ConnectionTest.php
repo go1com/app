@@ -17,7 +17,7 @@ class ConnectionTest extends TestCase
         $insert($connection = new MockConnection());
 
         // Check executed queries
-        $this->assertContains('INSERT INTO some_table (key_1) VALUES (?)', $connection->getLog('pdo'));
+        $this->assertStringContainsString('INSERT INTO some_table (key_1) VALUES (?)', $connection->getLog('pdo'));
         $this->assertEquals(['value_1'], $connection->getLog('state'));
     }
 
@@ -34,7 +34,7 @@ class ConnectionTest extends TestCase
         $update($connection = new MockConnection());
 
         // Check executed queries
-        $this->assertContains('UPDATE some_table SET key_1 = ? WHERE id = ?', $connection->getLog('pdo'));
+        $this->assertStringContainsString('UPDATE some_table SET key_1 = ? WHERE id = ?', $connection->getLog('pdo'));
         $this->assertEquals(['value_2', 555], $connection->getLog('state'));
     }
 
@@ -47,7 +47,7 @@ class ConnectionTest extends TestCase
         $query($connection = new MockConnection());
 
         // Check executed queries
-        $this->assertContains('SELECT 1', $connection->getLog('pdo'));
+        $this->assertStringContainsString('SELECT 1', $connection->getLog('pdo'));
         $this->assertEquals([1], $connection->getLog('state'));
     }
 
@@ -66,7 +66,7 @@ class ConnectionTest extends TestCase
         $builder($connection = new MockConnection());
 
         // Check executed queries
-        $this->assertContains('SELECT u.* FROM users u WHERE u.uid = ?', $connection->getLog('pdo'));
+        $this->assertStringContainsString('SELECT u.* FROM users u WHERE u.uid = ?', $connection->getLog('pdo'));
         $this->assertEquals([1, 999, 2], $connection->getLog('state', 'values')[0]);
     }
 }

@@ -11,7 +11,7 @@ class ActiveResponseTest extends AppTest
 {
     private $shouldBeTrue = false;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->shouldBeTrue = false;
     }

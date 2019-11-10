@@ -100,6 +100,6 @@ class LoggerServiceTest extends TestCase
         });
 
         $app->handle(Request::create('/testErrorIsLogged'));
-        $this->assertContains('Something went wrong.', $logger->log['error'][0]);
+        $this->assertStringContainsString('Something went wrong.', $logger->log['error'][0]);
     }
 }
