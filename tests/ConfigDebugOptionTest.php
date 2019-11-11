@@ -13,7 +13,7 @@ class ConfigDebugOptionTest extends TestCase
     /**
      * This method is called before the first test of this test class is run.
      */
-    public static function setUpBeforeClass()/* The :void return type declaration that should be here would cause a BC issue */
+    public static function setUpBeforeClass() : void
     {
         self::$phpServer = proc_open('exec php -S 127.0.0.1:4455 -t tests/fixtures/error-documentroot &> /dev/null', [], $pipes = []);
         if (self::$phpServer !== false) {
@@ -24,14 +24,14 @@ class ConfigDebugOptionTest extends TestCase
     /**
      * This method is called after the last test of this test class is run.
      */
-    public static function tearDownAfterClass()/* The :void return type declaration that should be here would cause a BC issue */
+    public static function tearDownAfterClass() : void
     {
         if (self::$phpServer !== false) {
             proc_terminate(self::$phpServer, 9);
         }
     }
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->assertNotFalse(self::$phpServer);
     }

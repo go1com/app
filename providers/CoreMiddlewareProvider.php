@@ -14,9 +14,20 @@ class CoreMiddlewareProvider implements BootableProviderInterface
     {
         // Convert json request to array
         $app->before(function (Request $request) {
-            if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
-                $data = json_decode($request->getContent(), true);
-                $request->request->replace(is_array($data) ? $data : []);
+            if (in_array($request->getMethod(), ['GET', 'HEAD']) || $request->getContentType() !== 'json') {
+                return;
+            }
+
+            $data = json_decode($request->getContent(), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return new JsonResponse(
+                    ['message' => 'Invalid JSON payload. ' . json_last_error_msg()],
+                    JsonResponse::HTTP_BAD_REQUEST
+                );
+            }
+
+            if (is_array($data)) {
+                $request->request->replace($data);
             }
         });
 
