@@ -18,7 +18,12 @@ class CoreMiddlewareProvider implements BootableProviderInterface
                 return;
             }
 
-            $data = json_decode($request->getContent(), true);
+            $content = $request->getContent();
+            if ($content === '') {
+                return;
+            }
+
+            $data = json_decode($content, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return new JsonResponse(
                     ['message' => 'Invalid JSON payload. ' . json_last_error_msg()],
