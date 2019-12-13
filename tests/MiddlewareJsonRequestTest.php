@@ -36,4 +36,17 @@ class MiddlewareJsonRequestTest extends TestCase
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $res->getStatusCode());
         $this->assertStringContainsString('Invalid JSON payload', $res->getContent());
     }
+
+    public function testItHandlesEmptyBodyGracefully()
+    {
+        $app = new App();
+        $app->post('/call-me', function (Request $req) use (&$called) {
+            return new JsonResponse($req->request->all());
+        });
+
+        $req = Request::create('/call-me', 'POST', [], [], [], [], '');
+        $req->headers->set('Content-Type', 'application/json');
+        $res = $app->handle($req);
+        $this->assertEquals(Response::HTTP_OK, $res->getStatusCode());
+    }
 }
