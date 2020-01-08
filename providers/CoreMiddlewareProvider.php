@@ -7,6 +7,7 @@ use Silex\Api\BootableProviderInterface;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class CoreMiddlewareProvider implements BootableProviderInterface
 {
@@ -37,12 +38,16 @@ class CoreMiddlewareProvider implements BootableProviderInterface
         });
 
         // On error.
-        $app->error(function (Exception $e) use ($app) {
-            if ($app->offsetExists('debug') && $app->offsetGet('debug')) {
-                throw $e;
-            }
+        if (!$app->offsetExists('debug') || !$app->offsetGet('debug')) {
+            $app->error(function (HttpException $e) {
+                $httpStatusCode = $e->getStatusCode();
+                $headers = $e->getHeaders();
+                return new JsonResponse(['message' => $e->getMessage()], $httpStatusCode, $headers);
+            });
 
-            return new JsonResponse(['message' => $e->getMessage()], 500);
-        });
+            $app->error(function (Exception $e) {
+                return new JsonResponse(['message' => $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+            });
+        }
     }
 }
