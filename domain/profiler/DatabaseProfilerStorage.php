@@ -47,7 +47,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
         );
     }
 
-    public function find($ip, $url, $limit, $method, $start = null, $end = null)
+    public function find($ip, $url, $limit, $method, $start = null, $end = null) : array
     {
         $q = $this
             ->db
@@ -73,7 +73,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
         return $rows ?? [];
     }
 
-    public function write(Profile $profile)
+    public function write(Profile $profile) : bool
     {
         $fields = [
             'token'       => $profile->getToken(),
@@ -94,7 +94,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
             ),
         ];
 
-        $this->db->insert('profiler_items', $fields);
+        return $this->db->insert('profiler_items', $fields) > 0;
     }
 
     public function purge()
@@ -102,7 +102,7 @@ class DatabaseProfilerStorage implements ProfilerStorageInterface
         $this->db->delete('profiler_items', []);
     }
 
-    public function read($token)
+    public function read($token) : ?Profile
     {
         $items = $this->readMultiple([$token]);
 
