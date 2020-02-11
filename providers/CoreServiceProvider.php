@@ -49,6 +49,8 @@ use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Stopwatch\Stopwatch;
+use DDTrace\Bootstrap;
+use DDTrace\Integrations\IntegrationsLoader;
 
 class CoreServiceProvider implements ServiceProviderInterface
 {
@@ -66,6 +68,7 @@ class CoreServiceProvider implements ServiceProviderInterface
         $this->registerLogServices($c);
         $c->offsetExists('clientOptions') && $this->registerClientService($c);
         $this->registerProfilerServices($c);
+        $this->registerTracingService();
 
         $c['middleware.jwt'] = function () { return new JwtMiddleware; };
         $c['middleware.core'] = function () { return new CoreMiddlewareProvider; };
@@ -284,5 +287,13 @@ class CoreServiceProvider implements ServiceProviderInterface
 
             return new Client($options);
         };
+    }
+
+    private function registerTracingService()
+    {
+        if (!empty(getenv('DD_AGENT_HOST')) && extension_loaded('ddtrace')) {
+            Bootstrap::tracerOnce();
+            IntegrationsLoader::load();
+        }
     }
 }
