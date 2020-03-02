@@ -51,6 +51,7 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Stopwatch\Stopwatch;
 use DDTrace\Bootstrap;
 use DDTrace\Integrations\IntegrationsLoader;
+use Doctrine\Common\Cache\PredisCache;
 
 class CoreServiceProvider implements ServiceProviderInterface
 {
@@ -143,8 +144,17 @@ class CoreServiceProvider implements ServiceProviderInterface
 
             $host = $c['cacheOptions']['host'];
             $port = $c['cacheOptions']['port'];
-            
-            return new PredisClient("$host:$port");
+            $options = [];
+
+            $hosts = "{$host}:{$port}";
+            if (isset($c['cacheOptions']['replication'])) {
+                $replicationHost = $c['cacheOptions']['replication']['host'];
+                $replicationPort = $c['cacheOptions']['replication']['port'];
+                $hosts = ["{$host}:{$port}", "{$replicationHost}:{$replicationPort}"];
+                $options += ['replication' => true];
+            }
+
+            return new PredisCache(new PredisClient($hosts, $options));
         };
     }
 
