@@ -147,7 +147,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             $options = [];
 
             $hosts = "{$host}:{$port}";
-            if ($c['cacheOptions']['replication']) {
+            if (isset($c['cacheOptions']['replication'])) {
                 $replicationHost = $c['cacheOptions']['replication']['host'];
                 $replicationPort = $c['cacheOptions']['replication']['port'];
                 $hosts = ["{$host}:{$port}", "{$replicationHost}:{$replicationPort}"];
