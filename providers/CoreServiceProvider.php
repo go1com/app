@@ -84,6 +84,7 @@ class CoreServiceProvider implements ServiceProviderInterface
                 case 'memcached':
                 case 'filesystem':
                 case 'redis':
+                case 'predis':
                     return class_exists(TestCase::class, false) ? $c["cache.array"] : $c["cache.{$backend}"];
 
                 default:
