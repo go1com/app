@@ -154,8 +154,8 @@ class CoreServiceProvider implements ServiceProviderInterface
                 $hosts = ["{$host}:{$port}", "{$replicationHost}:{$replicationPort}"];
                 $options += ['replication' => true];
             }
-            if (isset($c['cacheOptions']['name'])) {
-                $options += ['prefix' => $c['cacheOptions']['name']];
+            if (isset($c['cacheOptions']['prefix'])) {
+                $options += ['prefix' => $c['cacheOptions']['prefix']];
             }
 
             return new PredisCache(new PredisClient($hosts, $options));
