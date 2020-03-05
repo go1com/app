@@ -143,22 +143,30 @@ class CoreServiceProvider implements ServiceProviderInterface
                 throw new RuntimeException('Missing caching driver.');
             }
 
-            $host = $c['cacheOptions']['host'];
-            $port = $c['cacheOptions']['port'];
+            list($hosts, $options) = $c['cache.predis.options'];
+
+            return new PredisCache(new PredisClient($hosts, $options));
+        };
+
+        $c['cache.predis.options'] = function (Container $c) {
             $options = [];
 
-            $hosts = "{$host}:{$port}";
+            $masterDsn = $c['cacheOptions']['dsn'];
+            $hosts = [$masterDsn];
             if (isset($c['cacheOptions']['replication'])) {
-                $replicationHost = $c['cacheOptions']['replication']['host'];
-                $replicationPort = $c['cacheOptions']['replication']['port'];
-                $hosts = ["{$host}:{$port}?alias=master", "{$replicationHost}:{$replicationPort}"];
+                $query = parse_url($masterDsn, PHP_URL_QUERY);
+                $masterDsn .= $query ? '&alias=master' : '?alias=master';
+
+                $replicationDsn = $c['cacheOptions']['replication']['dsn'];
+                $hosts = [$masterDsn, $replicationDsn];
                 $options += ['replication' => true];
             }
+
             if (isset($c['cacheOptions']['prefix'])) {
                 $options += ['prefix' => $c['cacheOptions']['prefix']];
             }
 
-            return new PredisCache(new PredisClient($hosts, $options));
+            return [$hosts, $options];
         };
     }
 
