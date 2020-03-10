@@ -51,6 +51,7 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Stopwatch\Stopwatch;
 use DDTrace\Bootstrap;
 use DDTrace\Integrations\IntegrationsLoader;
+use function substr;
 use Doctrine\Common\Cache\PredisCache;
 
 class CoreServiceProvider implements ServiceProviderInterface
@@ -143,7 +144,7 @@ class CoreServiceProvider implements ServiceProviderInterface
                 throw new RuntimeException('Missing caching driver.');
             }
 
-            list($hosts, $options) = $c['cache.predis.options'];
+            [$hosts, $options] = $c['cache.predis.options'];
 
             return new PredisCache(new PredisClient($hosts, $options));
         };
@@ -262,8 +263,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             });
 
             $c->register(
-                new class implements ServiceProviderInterface, EventListenerProviderInterface
-                {
+                new class implements ServiceProviderInterface, EventListenerProviderInterface {
                     public function subscribe(Container $c, EventDispatcherInterface $dispatcher)
                     {
                         $dispatcher->addSubscriber(new ProfilerListener($c['profiler'], $c['request_stack'], null, false, false));
@@ -287,7 +287,12 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $c['client'] = function (Container $c) {
             /** @var App $c */
-            $options = $c['clientOptions'] + ['User-Agent' => 'GO1 ' . $c::NAME . '/' . $c::VERSION];
+            $options = $c['clientOptions'];
+            $options['User-Agent'] = 'GO1 ' . $c::NAME . '/' . $c::VERSION;
+
+            if (!empty($_SERVER['HTTP_USER_AGENT'])) {
+                $options['User-Agent'] .= ' ' . substr($_SERVER['HTTP_USER_AGENT'], 0, 256);
+            }
 
             $stack = HandlerStack::create(new CurlHandler);
             // Add user-defined header, mentioned in a.o. section 5 of RFC 2047. (https://tools.ietf.org/html/rfc2047#section-5)
