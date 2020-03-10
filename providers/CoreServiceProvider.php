@@ -51,6 +51,7 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Stopwatch\Stopwatch;
 use DDTrace\Bootstrap;
 use DDTrace\Integrations\IntegrationsLoader;
+use function substr;
 
 class CoreServiceProvider implements ServiceProviderInterface
 {
@@ -265,7 +266,12 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $c['client'] = function (Container $c) {
             /** @var App $c */
-            $options = $c['clientOptions'] + ['User-Agent' => 'GO1 ' . $c::NAME . '/' . $c::VERSION];
+            $options = $c['clientOptions'];
+            $options['User-Agent'] = 'GO1 ' . $c::NAME . '/' . $c::VERSION;
+
+            if (!empty($_SERVER['HTTP_USER_AGENT'])) {
+                $options['User-Agent'] .= ' ' . substr($_SERVER['HTTP_USER_AGENT'], 0, 256);
+            }
 
             $stack = HandlerStack::create(new CurlHandler);
             // Add user-defined header, mentioned in a.o. section 5 of RFC 2047. (https://tools.ietf.org/html/rfc2047#section-5)
