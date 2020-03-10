@@ -288,10 +288,10 @@ class CoreServiceProvider implements ServiceProviderInterface
         $c['client'] = function (Container $c) {
             /** @var App $c */
             $options = $c['clientOptions'];
-            $options['User-Agent'] = 'GO1 ' . $c::NAME . '/' . $c::VERSION;
+            $options['headers']['User-Agent'] = 'GO1 ' . $c::NAME . '/' . $c::VERSION;
 
             if (!empty($_SERVER['HTTP_USER_AGENT'])) {
-                $options['User-Agent'] .= ' ' . substr($_SERVER['HTTP_USER_AGENT'], 0, 256);
+                $options['headers']['User-Agent'] = substr($_SERVER['HTTP_USER_AGENT'], 0, 256);
             }
 
             $stack = HandlerStack::create(new CurlHandler);
