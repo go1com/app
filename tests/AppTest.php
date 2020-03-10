@@ -44,4 +44,44 @@ class AppTest extends TestCase
         $app = new App(__DIR__ . '/fixtures/demo-app.config.php');
         $this->assertEquals('bar1', $app['bar']);
     }
+
+    public function testRedis()
+    {
+        {
+            $app = new App([
+                'cacheOptions' => [
+                    'backend'     => 'predis',
+                    'dsn'         => 'tcp://master:6379',
+                    'prefix'      => 'local:SERVICE_NAME',
+                    'replication' => [
+                        'dsn' => 'tcp://replication:6379',
+                    ]
+                ]
+            ]);
+
+            [$hosts, $options] = $app['cache.predis.options'];
+
+            $this->assertEquals(['tcp://master:6379?alias=master', 'tcp://replication:6379'], $hosts);
+            $this->assertEquals(['replication' => true, 'prefix' => 'local:SERVICE_NAME'], $options);
+        }
+
+        {
+            $app = new App([
+                'cacheOptions' => [
+                    'backend'     => 'predis',
+                    'dsn'         => 'tcp://master:6379?ssl[cafile]=private.pem&ssl[verify_peer]=1',
+                    'prefix'      => 'local:SERVICE_NAME',
+                    'replication' => [
+                        'dsn' => 'tcp://replication:6379',
+                    ]
+                ]
+            ]);
+
+            [$hosts, $options] = $app['cache.predis.options'];
+
+            $this->assertEquals(['tcp://master:6379?ssl[cafile]=private.pem&ssl[verify_peer]=1&alias=master', 'tcp://replication:6379'], $hosts);
+            $this->assertEquals(['replication' => true, 'prefix' => 'local:SERVICE_NAME'], $options);
+        }
+
+    }
 }

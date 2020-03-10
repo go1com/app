@@ -52,6 +52,7 @@ use Symfony\Component\Stopwatch\Stopwatch;
 use DDTrace\Bootstrap;
 use DDTrace\Integrations\IntegrationsLoader;
 use function substr;
+use Doctrine\Common\Cache\PredisCache;
 
 class CoreServiceProvider implements ServiceProviderInterface
 {
@@ -84,6 +85,7 @@ class CoreServiceProvider implements ServiceProviderInterface
                 case 'memcached':
                 case 'filesystem':
                 case 'redis':
+                case 'predis':
                     return class_exists(TestCase::class, false) ? $c["cache.array"] : $c["cache.{$backend}"];
 
                 default:
@@ -142,10 +144,30 @@ class CoreServiceProvider implements ServiceProviderInterface
                 throw new RuntimeException('Missing caching driver.');
             }
 
-            $host = $c['cacheOptions']['host'];
-            $port = $c['cacheOptions']['port'];
-            
-            return new PredisClient("$host:$port");
+            [$hosts, $options] = $c['cache.predis.options'];
+
+            return new PredisCache(new PredisClient($hosts, $options));
+        };
+
+        $c['cache.predis.options'] = function (Container $c) {
+            $options = [];
+
+            $masterDsn = $c['cacheOptions']['dsn'];
+            $hosts = [$masterDsn];
+            if (isset($c['cacheOptions']['replication'])) {
+                $query = parse_url($masterDsn, PHP_URL_QUERY);
+                $masterDsn .= $query ? '&alias=master' : '?alias=master';
+
+                $replicationDsn = $c['cacheOptions']['replication']['dsn'];
+                $hosts = [$masterDsn, $replicationDsn];
+                $options += ['replication' => true];
+            }
+
+            if (isset($c['cacheOptions']['prefix'])) {
+                $options += ['prefix' => $c['cacheOptions']['prefix']];
+            }
+
+            return [$hosts, $options];
         };
     }
 
@@ -241,8 +263,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             });
 
             $c->register(
-                new class implements ServiceProviderInterface, EventListenerProviderInterface
-                {
+                new class implements ServiceProviderInterface, EventListenerProviderInterface {
                     public function subscribe(Container $c, EventDispatcherInterface $dispatcher)
                     {
                         $dispatcher->addSubscriber(new ProfilerListener($c['profiler'], $c['request_stack'], null, false, false));
