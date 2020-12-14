@@ -177,6 +177,23 @@ class CoreServiceProvider implements ServiceProviderInterface
 
             $logger = new Logger(isset($c['logOptions']['name']) ? $c['logOptions']['name'] : 'go1');
 
+            // @see https://docs.datadoghq.com/tracing/connect_logs_and_traces/php/
+            if (class_exists('\DDTrace\GlobalTracer') && function_exists('dd_trace_peek_span_id')) {
+                $logger->pushProcessor(function ($record) {
+                    $span = \DDTrace\GlobalTracer::get()->getActiveSpan();
+                    if (null === $span) {
+                        return $record;
+                    }
+
+                    $record['dd'] = [
+                        'trace_id' => $span->getTraceId(),
+                        'span_id'  => \dd_trace_peek_span_id(),
+                    ];
+
+                    return $record;
+                });
+            }
+
             return $logger->pushHandler($c['logger.php_error']);
         };
 
