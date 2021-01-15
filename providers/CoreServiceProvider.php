@@ -163,6 +163,10 @@ class CoreServiceProvider implements ServiceProviderInterface
             if (isset($c['cacheOptions']['prefix'])) {
                 $options += ['prefix' => $c['cacheOptions']['prefix']];
             }
+            
+            if (isset($c['cacheOptions']['parameters'])) {
+                $options += ['parameters' => $c['cacheOptions']['parameters']];
+            }
 
             return [$hosts, $options];
         };
