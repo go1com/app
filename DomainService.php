@@ -19,14 +19,20 @@ class DomainService extends GO1
 
         // register configured service providers
         foreach ($serviceProviders as $serviceProvider) {
-            $serviceProvider instanceOf ServiceProviderInterface
+            $serviceProvider instanceof ServiceProviderInterface
                 ? $this->register($serviceProvider)
                 : $this->register($serviceProvider[0], $serviceProvider[1]);
         }
 
         // default endpoint
         $this->get('/', function () {
-            return new JsonResponse(['service' => static::NAME, 'version' => static::VERSION, 'time' => time()]);
+            return new JsonResponse([
+                'service' => static::NAME,
+                'version' => static::VERSION,
+                'tag'     => getenv('DD_VERSION') ?: '',
+                'env'     => getenv('DD_ENV') ?: '',
+                'time'    => time(),
+            ]);
         });
     }
 }
