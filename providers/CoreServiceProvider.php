@@ -5,6 +5,7 @@ namespace go1\app\providers;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\FilesystemCache;
 use Doctrine\Common\Cache\MemcachedCache;
+use Doctrine\Common\Cache\PredisCache;
 use Doctrine\Common\Cache\RedisCache;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Logging\DebugStack;
@@ -15,7 +16,6 @@ use go1\app\domain\profiler\DoctrineDataCollector;
 use go1\app\domain\profiler\ElasticSearchDataCollector;
 use go1\app\domain\profiler\GuzzleDataCollector;
 use go1\app\domain\profiler\GuzzleHistory;
-use go1\app\domain\profiler\Neo4jDataCollector;
 use go1\app\domain\profiler\RabbitMqDataCollector;
 use go1\jwt_middleware\JwtMiddleware;
 use GuzzleHttp\Client;
@@ -23,6 +23,7 @@ use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Memcached;
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -50,7 +51,6 @@ use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Stopwatch\Stopwatch;
 use function substr;
-use Doctrine\Common\Cache\PredisCache;
 
 class CoreServiceProvider implements ServiceProviderInterface
 {
@@ -163,7 +163,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             if (isset($c['cacheOptions']['prefix'])) {
                 $options += ['prefix' => $c['cacheOptions']['prefix']];
             }
-            
+
             if (isset($c['cacheOptions']['parameters'])) {
                 $options += ['parameters' => $c['cacheOptions']['parameters']];
             }
@@ -182,15 +182,10 @@ class CoreServiceProvider implements ServiceProviderInterface
             $logger = new Logger(isset($c['logOptions']['name']) ? $c['logOptions']['name'] : 'go1');
 
             // @see https://docs.datadoghq.com/tracing/connect_logs_and_traces/php/
-            if (class_exists('\DDTrace\GlobalTracer') && function_exists('dd_trace_peek_span_id')) {
+            if (function_exists('\DDTrace\trace_id')) {
                 $logger->pushProcessor(function ($record) {
-                    $span = \DDTrace\GlobalTracer::get()->getActiveSpan();
-                    if (null === $span) {
-                        return $record;
-                    }
-
                     $record['dd'] = [
-                        'trace_id' => $span->getTraceId(),
+                        'trace_id' => \DDTrace\trace_id(),
                         'span_id'  => \dd_trace_peek_span_id(),
                     ];
 
@@ -203,8 +198,10 @@ class CoreServiceProvider implements ServiceProviderInterface
 
         $c['logger.php_error'] = function (Container $c) {
             $logLevel = isset($c['logOptions']['level']) ? $c['logOptions']['level'] : LogLevel::ERROR;
+            $handler = new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel);
+            $handler->setFormatter(new JsonFormatter());
 
-            return new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel);
+            return $handler;
         };
     }
 
