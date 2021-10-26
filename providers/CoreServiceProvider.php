@@ -199,7 +199,9 @@ class CoreServiceProvider implements ServiceProviderInterface
         $c['logger.php_error'] = function (Container $c) {
             $logLevel = isset($c['logOptions']['level']) ? $c['logOptions']['level'] : LogLevel::ERROR;
             $handler = new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel);
-            $handler->setFormatter(new JsonFormatter());
+            $jsonFormatter = new JsonFormatter();
+            $jsonFormatter->includeStacktraces(true);
+            $handler->setFormatter($jsonFormatter);
 
             return $handler;
         };
