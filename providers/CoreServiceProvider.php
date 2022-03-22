@@ -314,8 +314,8 @@ class CoreServiceProvider implements ServiceProviderInterface
             $options['force_ip_resolve'] = 'v4';
             # The client don't use CurlMultiHandler stack, so the curl option need to be on curl array.
             # https://docs.guzzlephp.org/en/stable/faq.html#how-can-i-add-custom-curl-options
-            $options['curl']['CURLOPT_DNS_SHUFFLE_ADDRESSES'] = false;
-            $options['curl']['CURLOPT_DNS_USE_GLOBAL_CACHE'] = true;
+            $options['curl'][CURLOPT_DNS_SHUFFLE_ADDRESSES] = false;
+            $options['curl'][CURLOPT_DNS_USE_GLOBAL_CACHE] = true;
 
             $stack = HandlerStack::create(new CurlHandler);
             // Add user-defined header, mentioned in a.o. section 5 of RFC 2047. (https://tools.ietf.org/html/rfc2047#section-5)
