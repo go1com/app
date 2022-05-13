@@ -128,7 +128,11 @@ class CoreServiceProvider implements ServiceProviderInterface
             $host = $c['cacheOptions']['host'];
             $port = $c['cacheOptions']['port'];
             $redis = new Redis($name);
-            $redis->connect($host, $port);
+            if (!$c['cacheOptions']['persistent']) {
+                $redis->connect($host, $port);
+            } else {
+                $redis->pconnect($host, $port);
+            }
 
             $cache = new RedisCache();
             $cache->setRedis($redis);
@@ -166,6 +170,10 @@ class CoreServiceProvider implements ServiceProviderInterface
 
             if (isset($c['cacheOptions']['parameters'])) {
                 $options += ['parameters' => $c['cacheOptions']['parameters']];
+            }
+
+            if (!isset($c['cacheOptions']['persistent']) || $c['cacheOptions']['persistent'] === true) {
+                $options += ['persistent' => true];
             }
 
             return [$hosts, $options];
