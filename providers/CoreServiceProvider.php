@@ -172,7 +172,7 @@ class CoreServiceProvider implements ServiceProviderInterface
                 $options += ['parameters' => $c['cacheOptions']['parameters']];
             }
 
-            if (!isset($c['cacheOptions']['persistent'])) {
+            if (!isset($c['cacheOptions']['persistent']) || $c['cacheOptions']['persistent'] === true) {
                 $options += ['persistent' => true];
             }
 
