@@ -158,7 +158,7 @@ class CoreServiceProvider implements ServiceProviderInterface
             // add persistent and read_write_timeout connection options
             $connectionOptions = [];
             if (!isset($c['cacheOptions']['persistent']) || $c['cacheOptions']['persistent'] === true) {
-                $connectionOptions += ['persistent' => true];
+                $connectionOptions += ['persistent' => 1]; // if we add it as a query parameter, google says this should be 1 instead of true
             }
             $connectionOptions += ['read_write_timeout' => !isset($c['cacheOptions']['read_write_timeout']) ? 2 : $c['cacheOptions']['read_write_timeout']];
             $masterDsn .= parse_url($masterDsn, PHP_URL_QUERY) ? '&' : '?';
