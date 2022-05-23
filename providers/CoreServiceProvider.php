@@ -154,12 +154,24 @@ class CoreServiceProvider implements ServiceProviderInterface
             $options = [];
 
             $masterDsn = $c['cacheOptions']['dsn'];
-            $hosts = [$masterDsn];
-            if (isset($c['cacheOptions']['replication'])) {
-                $query = parse_url($masterDsn, PHP_URL_QUERY);
-                $masterDsn .= $query ? '&alias=master' : '?alias=master';
 
+            // add persistent and read_write_timeout connection options
+            $connectionOptions = [];
+            if (!isset($c['cacheOptions']['persistent']) || $c['cacheOptions']['persistent'] === true) {
+                $connectionOptions += ['persistent' => true];
+            }
+            $connectionOptions += ['read_write_timeout' => !isset($c['cacheOptions']['read_write_timeout']) ? 2 : $c['cacheOptions']['read_write_timeout']];
+            $masterDsn .= parse_url($masterDsn, PHP_URL_QUERY) ? '&' : '?';
+            $masterDsn .= http_build_query($connectionOptions);
+
+            $hosts = [$masterDsn];
+            if (isset($c['cacheOptions']['replication'])) {               
                 $replicationDsn = $c['cacheOptions']['replication']['dsn'];
+                if ($replicationDsn) {
+                    $replicationDsn .= parse_url($replicationDsn, PHP_URL_QUERY) ? '&' : '?';
+                    $replicationDsn .= http_build_query($connectionOptions);
+                }       
+                $masterDsn .= '&alias=master';                
                 $hosts = [$masterDsn, $replicationDsn];
                 $options += ['replication' => true];
             }
@@ -172,9 +184,6 @@ class CoreServiceProvider implements ServiceProviderInterface
                 $options += ['parameters' => $c['cacheOptions']['parameters']];
             }
 
-            if (!isset($c['cacheOptions']['persistent']) || $c['cacheOptions']['persistent'] === true) {
-                $options += ['persistent' => true];
-            }
 
             return [$hosts, $options];
         };
