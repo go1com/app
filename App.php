@@ -142,12 +142,10 @@ class App extends Application
         }
 
         if ($e instanceof MethodNotAllowedHttpException) {
-            $logger->warning($e->getMessage());
             return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_METHOD_NOT_ALLOWED);
         }
 
         if ($e instanceof MethodNotAllowedException) {
-            $logger->warning($e->getMessage());
             return new JsonResponse(['message' => $e->getMessage()], 404);
         }
 
