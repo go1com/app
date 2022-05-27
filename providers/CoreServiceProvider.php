@@ -199,11 +199,12 @@ class CoreServiceProvider implements ServiceProviderInterface
             $logger = new Logger(isset($c['logOptions']['name']) ? $c['logOptions']['name'] : 'go1');
 
             // @see https://docs.datadoghq.com/tracing/connect_logs_and_traces/php/
-            if (function_exists('\DDTrace\trace_id')) {
-                $logger->pushProcessor(function ($record) {
+            if (function_exists('\DDTrace\current_context')) {
+                $context = \DDTrace\current_context();
+                $logger->pushProcessor(function ($record) use ($context) {
                     $record['dd'] = [
-                        'trace_id' => \DDTrace\trace_id(),
-                        'span_id'  => \dd_trace_peek_span_id(),
+                        'trace_id' => $context['trace_id'],
+                        'span_id'  => $context['span_id'],
                     ];
 
                     return $record;
