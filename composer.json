@@ -9,7 +9,7 @@
     }
   },
   "require": {
-    "doctrine/dbal":      "v2.10.1",
+    "doctrine/dbal":      "2.12.1",
     "go1/jwt-middleware": "^0.5",
     "silex/silex":        "^v2.3.0",
     "symfony/stopwatch":  "^3.2",
