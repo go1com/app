@@ -122,9 +122,7 @@ class App extends Application
                 http_response_code($code);
                 echo $e;
                 if ($this->offsetExists('logger')) {
-                    /** @var LoggerInterface $logger */
-                    $logger = $this['logger'];
-                    $logger->error($e->getMessage());
+                    return $this->onError($e);
                 }
             } finally {
                 exit(1);
