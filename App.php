@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class App extends Application
@@ -143,7 +144,7 @@ class App extends Application
             return new JsonResponse(['message' => $e->getMessage()], Response::HTTP_METHOD_NOT_ALLOWED);
         }
 
-        if ($e instanceof MethodNotAllowedException) {
+        if ($e instanceof MethodNotAllowedException || $e instanceof NotFoundHttpException) {
             return new JsonResponse(['message' => $e->getMessage()], 404);
         }
 
