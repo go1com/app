@@ -14,7 +14,7 @@
     "silex/silex":        "^v2.3.0",
     "symfony/stopwatch":  "^3.2",
     "symfony/service-contracts": "^1.1",
-    "datadog/dd-trace": "0.73.0"
+    "datadog/dd-trace": "^0.73.0"
   },
   "require-dev": {
     "guzzlehttp/guzzle": "^6.2",
